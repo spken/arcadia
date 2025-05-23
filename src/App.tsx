@@ -1,8 +1,9 @@
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, useCallback, ReactNode, createContext, useContext } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 
 // Define types for props
 interface ThemeProviderProps {
@@ -33,6 +34,22 @@ interface LibraryStatus {
 
 interface AppSettings {
   theme: string;
+  systemMetricsEnabled: boolean;
+}
+
+type SettingsContextType = {
+  settings: AppSettings;
+  updateSettings: (settings: Partial<AppSettings>) => void;
+};
+
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+
+function useSettings() {
+  const context = useContext(SettingsContext);
+  if (!context) {
+    throw new Error('useSettings must be used within a SettingsProvider');
+  }
+  return context;
 }
 
 // Placeholder components - these would be implemented separately
@@ -44,7 +61,7 @@ const SideNav = ({ currentView, onChange, libraryStatus }: SideNavProps) => (
   <div className="w-64 h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
     <div className="p-4 space-y-1">
       {['dashboard', 'library', 'screenshots', 'analytics', 'settings'].map((item) => (
-        <Button 
+        <Button
           key={item}
           variant={currentView === item ? "secondary" : "ghost"}
           className="w-full justify-start"
@@ -77,19 +94,68 @@ const LoadingScreen = () => (
 
 // Placeholder page components
 const Dashboard = ({ onGameSelect }: GameActionProps) => {
-  // Placeholder data
+  const { settings } = useSettings();
+  // Placeholder data for games
   const recentGames = [
     { id: 'game1', name: 'Cyberpunk 2077', lastPlayed: '2 hours ago', playtime: '45h' },
     { id: 'game2', name: 'Elden Ring', lastPlayed: 'yesterday', playtime: '120h' },
     { id: 'game3', name: 'Baldur\'s Gate 3', lastPlayed: '3 days ago', playtime: '80h' }
   ];
-  
-  const systemStats = {
-    cpu: '45%',
-    memory: '6.2 GB / 16 GB',
-    gpu: '30%',
-    storage: '450 GB free'
-  };
+  const [systemStats, setSystemStats] = useState({
+    cpu: '0%',
+    memory: '0 GB / 0 GB',
+    gpu: '0%',
+    storage: '0 GB free'
+  });
+  const [loading, setLoading] = useState({
+    cpu: true,
+    memory: true,
+    gpu: true,
+    storage: true
+  });
+  const handleSystemInfoUpdate = useCallback((_event: any, info: any) => {
+    setSystemStats(prevStats => {
+      if (
+        prevStats.cpu !== info.cpu ||
+        prevStats.memory !== info.memory ||
+        prevStats.gpu !== info.gpu ||
+        prevStats.storage !== info.storage
+      ) {
+        return info;
+      }
+      return prevStats;
+    });
+    setLoading({cpu: false, memory: false, gpu: false, storage: false});
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    if (!settings.systemMetricsEnabled) {
+      return;
+    }
+    
+    setLoading({cpu: true, memory: true, gpu: true, storage: true});
+    
+    window.ipcRenderer.getSystemInfo().then((info) => {
+      if (isMounted) {
+        setSystemStats(info);
+        setLoading({cpu: false, memory: false, gpu: false, storage: false});
+      }
+    }).catch(err => {
+      console.error('Failed to get system info:', err);
+      if (isMounted) {
+        setLoading({cpu: false, memory: false, gpu: false, storage: false});
+      }
+    });
+
+    window.ipcRenderer.on('system-info-update', handleSystemInfoUpdate);
+
+    return () => {
+      isMounted = false;
+      window.ipcRenderer.off('system-info-update', handleSystemInfoUpdate);
+    };
+  }, [handleSystemInfoUpdate, settings.systemMetricsEnabled]);
 
   return (
     <div className="p-6 space-y-6">
@@ -97,7 +163,7 @@ const Dashboard = ({ onGameSelect }: GameActionProps) => {
         <h1 className="text-3xl font-bold">Welcome back</h1>
         <Button variant="outline">Refresh Library</Button>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="col-span-2">
           <CardHeader>
@@ -120,31 +186,140 @@ const Dashboard = ({ onGameSelect }: GameActionProps) => {
             </div>
           </CardContent>
         </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>System Status</CardTitle>
+        <Card>          
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <CardTitle>System Status</CardTitle>
+              {!settings.systemMetricsEnabled ? (
+                <Badge variant="destructive">Disabled</Badge>
+              ) : (loading.cpu || loading.memory || loading.gpu || loading.storage) ? (
+                <Badge variant="outline" className="animate-pulse">
+                  Loading...
+                </Badge>
+              ) : (
+                <Badge variant={systemStats.cpu !== 'Error' ? "success" : "destructive"}>
+                  {systemStats.cpu !== 'Error' ? 'Live' : 'Error'}
+                </Badge>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-1">
-                <p className="text-sm">CPU Usage:</p>
-                <p className="text-sm font-medium text-right">{systemStats.cpu}</p>
-                
-                <p className="text-sm">Memory:</p>
-                <p className="text-sm font-medium text-right">{systemStats.memory}</p>
-                
-                <p className="text-sm">GPU Usage:</p>
-                <p className="text-sm font-medium text-right">{systemStats.gpu}</p>
-                
-                <p className="text-sm">Free Storage:</p>
-                <p className="text-sm font-medium text-right">{systemStats.storage}</p>
+            {!settings.systemMetricsEnabled ? (
+              <div className="flex flex-col items-center justify-center py-4 opacity-60">
+                <p className="text-sm text-muted-foreground text-center mb-2">System metrics are disabled</p>
+                <p className="text-xs text-muted-foreground text-center">Enable them in Settings to see live system information</p>
               </div>
-            </div>
+            ) : (
+              /* CPU Usage */
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm">CPU Usage</span>
+                    <span className="text-sm font-medium">
+                      {loading.cpu ? (
+                        <span className="inline-block w-12 h-4 bg-secondary rounded animate-pulse"></span>
+                      ) : (
+                        systemStats.cpu
+                      )}
+                    </span>
+                  </div>
+                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+                    {loading.cpu ? (
+                      <div className="h-full w-full bg-gradient-to-r from-primary/30 to-primary/60 animate-pulse"></div>
+                    ) : (
+                      <div
+                        className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
+                        style={{ width: `${systemStats.cpu !== 'Error' ? parseInt(systemStats.cpu) : 0}%` }}
+                      ></div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Memory Usage */}
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm">Memory</span>
+                    <span className="text-sm font-medium">
+                      {loading.memory ? (
+                        <span className="inline-block w-24 h-4 bg-secondary rounded animate-pulse"></span>
+                      ) : (
+                        systemStats.memory
+                      )}
+                    </span>
+                  </div>
+                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+                    {loading.memory ? (
+                      <div className="h-full w-full bg-gradient-to-r from-primary/30 to-primary/60 animate-pulse"></div>
+                    ) : (
+                      <div
+                        className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
+                        style={{
+                          width: systemStats.memory !== 'Error'
+                            ? `${(parseFloat(systemStats.memory.split(' ')[0]) / parseFloat(systemStats.memory.split(' ')[3])) * 100}%`
+                            : '0%'
+                        }}
+                      ></div>
+                    )}
+                  </div>
+                </div>
+
+                {/* GPU Usage */}
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm">GPU Usage</span>
+                    <span className="text-sm font-medium">
+                      {loading.gpu ? (
+                        <span className="inline-block w-12 h-4 bg-secondary rounded animate-pulse"></span>
+                      ) : (
+                        systemStats.gpu
+                      )}
+                    </span>
+                  </div>
+                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+                    {loading.gpu ? (
+                      <div className="h-full w-full bg-gradient-to-r from-primary/30 to-primary/60 animate-pulse"></div>
+                    ) : (
+                      <div
+                        className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
+                        style={{ width: `${systemStats.gpu !== 'Error' && systemStats.gpu !== 'N/A' ? parseInt(systemStats.gpu) : 0}%` }}
+                      ></div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Storage */}
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm">Storage</span>
+                    <span className="text-sm font-medium text-right">
+                      {loading.storage ? (
+                        <span className="inline-block w-32 h-4 bg-secondary rounded animate-pulse"></span>
+                      ) : (
+                        systemStats.storage
+                      )}
+                    </span>
+                  </div>
+                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+                    {loading.storage ? (
+                      <div className="h-full w-full bg-gradient-to-r from-primary/30 to-primary/60 animate-pulse"></div>
+                    ) : (
+                      systemStats.storage !== 'Error' && (
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
+                          style={{
+                            width: `${100 - (parseFloat(systemStats.storage.split(' ')[0]) / parseFloat(systemStats.storage.split(' ')[4])) * 100}%`
+                          }}
+                        ></div>
+                      )
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -174,7 +349,7 @@ const Dashboard = ({ onGameSelect }: GameActionProps) => {
             </Button>
           </CardFooter>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Game Activity</CardTitle>
@@ -220,7 +395,7 @@ const Library = ({ onGameSelect }: GameActionProps) => {
     { id: 'game5', name: 'The Witcher 3', developer: 'CD Projekt Red', installed: false, size: '50.0 GB' },
     { id: 'game6', name: 'Mass Effect Legendary', developer: 'BioWare', installed: false, size: '120.0 GB' },
   ];
-  
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -231,11 +406,11 @@ const Library = ({ onGameSelect }: GameActionProps) => {
           <Button variant="default" size="sm">Add Game</Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {games.map(game => (
           <Card key={game.id} className="overflow-hidden">
-            <div 
+            <div
               className="h-36 bg-accent flex items-center justify-center cursor-pointer"
               onClick={() => onGameSelect(game.id)}
             >
@@ -253,9 +428,9 @@ const Library = ({ onGameSelect }: GameActionProps) => {
               <p className="text-sm text-muted-foreground">{game.developer}</p>
               <p className="text-sm text-muted-foreground">{game.size}</p>
               <div className="flex gap-2 mt-4">
-                <Button 
-                  variant="default" 
-                  size="sm" 
+                <Button
+                  variant="default"
+                  size="sm"
                   className="flex-1"
                   onClick={() => onGameSelect(game.id)}
                 >
@@ -291,7 +466,7 @@ const Screenshots = () => {
           <Button variant="default" size="sm">Import</Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {screenshots.map(screenshot => (
           <Card key={screenshot.id} className="overflow-hidden">
@@ -330,7 +505,7 @@ const Analytics = () => {
           <Button variant="outline" size="sm">All Time</Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <Card>
           <CardContent className="pt-6">
@@ -340,7 +515,7 @@ const Analytics = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
@@ -349,7 +524,7 @@ const Analytics = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
@@ -358,7 +533,7 @@ const Analytics = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
@@ -368,7 +543,7 @@ const Analytics = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader>
@@ -389,7 +564,7 @@ const Analytics = () => {
                 <p className="font-medium">120h 15m</p>
               </div>
               <Separator />
-              
+
               <div className="flex justify-between items-center">
                 <div className="flex gap-2 items-center">
                   <div className="w-8 h-8 bg-accent rounded-md flex items-center justify-center">
@@ -403,7 +578,7 @@ const Analytics = () => {
                 <p className="font-medium">130h 55m</p>
               </div>
               <Separator />
-              
+
               <div className="flex justify-between items-center">
                 <div className="flex gap-2 items-center">
                   <div className="w-8 h-8 bg-accent rounded-md flex items-center justify-center">
@@ -419,7 +594,7 @@ const Analytics = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Gaming Activity</CardTitle>
@@ -431,7 +606,7 @@ const Analytics = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Recent Sessions</CardTitle>
@@ -446,7 +621,7 @@ const Analytics = () => {
               <Badge>Today</Badge>
             </div>
             <Separator />
-            
+
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="font-medium">Elden Ring</h3>
@@ -455,7 +630,7 @@ const Analytics = () => {
               <Badge variant="outline">Yesterday</Badge>
             </div>
             <Separator />
-            
+
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="font-medium">Baldur's Gate 3</h3>
@@ -470,10 +645,12 @@ const Analytics = () => {
   );
 };
 const Settings = () => {
+  const { settings, updateSettings } = useSettings();
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Settings</h1>
-      
+
       <div className="space-y-8 max-w-3xl">
         <Card>
           <CardHeader>
@@ -528,7 +705,7 @@ const Settings = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Performance</CardTitle>
@@ -549,9 +726,20 @@ const Settings = () => {
               </div>
               <Button variant="outline">On</Button>
             </div>
+            <Separator />
+            <div className="flex justify-between items-center">              
+              <div>
+                <h3 className="font-medium">System Metrics</h3>
+                <p className="text-sm text-muted-foreground">Show live system metrics in dashboard</p>
+              </div>
+              <Switch
+                checked={settings.systemMetricsEnabled}
+                onCheckedChange={(checked) => updateSettings({ systemMetricsEnabled: checked })}
+              />
+            </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Privacy</CardTitle>
@@ -598,51 +786,51 @@ const GameDetail = ({ gameId, onBack }: GameDetailProps) => {
   // Placeholder game data - in a real app, this would be fetched based on the gameId
   const gameDetails = {
     id: gameId,
-    name: gameId === 'game1' ? 'Cyberpunk 2077' : 
-          gameId === 'game2' ? 'Elden Ring' : 
-          gameId === 'game3' ? 'Baldur\'s Gate 3' : 
+    name: gameId === 'game1' ? 'Cyberpunk 2077' :
+      gameId === 'game2' ? 'Elden Ring' :
+        gameId === 'game3' ? 'Baldur\'s Gate 3' :
           gameId === 'game4' ? 'Red Dead Redemption 2' :
-          gameId === 'game5' ? 'The Witcher 3' :
-          gameId === 'game6' ? 'Mass Effect Legendary' : `Game ${gameId}`,
+            gameId === 'game5' ? 'The Witcher 3' :
+              gameId === 'game6' ? 'Mass Effect Legendary' : `Game ${gameId}`,
     developer: gameId === 'game1' || gameId === 'game5' ? 'CD Projekt Red' :
-              gameId === 'game2' ? 'FromSoftware' :
-              gameId === 'game3' ? 'Larian Studios' :
-              gameId === 'game4' ? 'Rockstar Games' :
-              gameId === 'game6' ? 'BioWare' : 'Unknown Developer',
+      gameId === 'game2' ? 'FromSoftware' :
+        gameId === 'game3' ? 'Larian Studios' :
+          gameId === 'game4' ? 'Rockstar Games' :
+            gameId === 'game6' ? 'BioWare' : 'Unknown Developer',
     publisher: gameId === 'game1' || gameId === 'game5' ? 'CD Projekt' :
-              gameId === 'game2' ? 'Bandai Namco' :
-              gameId === 'game3' ? 'Larian Studios' :
-              gameId === 'game4' ? 'Rockstar Games' :
-              gameId === 'game6' ? 'Electronic Arts' : 'Unknown Publisher',
+      gameId === 'game2' ? 'Bandai Namco' :
+        gameId === 'game3' ? 'Larian Studios' :
+          gameId === 'game4' ? 'Rockstar Games' :
+            gameId === 'game6' ? 'Electronic Arts' : 'Unknown Publisher',
     releaseDate: gameId === 'game1' ? 'December 10, 2020' :
-                gameId === 'game2' ? 'February 25, 2022' :
-                gameId === 'game3' ? 'August 3, 2023' :
-                gameId === 'game4' ? 'October 26, 2018' :
-                gameId === 'game5' ? 'May 19, 2015' :
-                gameId === 'game6' ? 'May 14, 2021' : 'Unknown',
+      gameId === 'game2' ? 'February 25, 2022' :
+        gameId === 'game3' ? 'August 3, 2023' :
+          gameId === 'game4' ? 'October 26, 2018' :
+            gameId === 'game5' ? 'May 19, 2015' :
+              gameId === 'game6' ? 'May 14, 2021' : 'Unknown',
     installed: ['game1', 'game2', 'game3'].includes(gameId),
     size: gameId === 'game1' ? '65.2 GB' :
-          gameId === 'game2' ? '44.7 GB' :
-          gameId === 'game3' ? '122.0 GB' :
+      gameId === 'game2' ? '44.7 GB' :
+        gameId === 'game3' ? '122.0 GB' :
           gameId === 'game4' ? '112.5 GB' :
-          gameId === 'game5' ? '50.0 GB' :
-          gameId === 'game6' ? '120.0 GB' : 'Unknown',
+            gameId === 'game5' ? '50.0 GB' :
+              gameId === 'game6' ? '120.0 GB' : 'Unknown',
     playtime: gameId === 'game1' ? '45h 23m' :
-              gameId === 'game2' ? '120h 15m' :
-              gameId === 'game3' ? '80h 42m' :
-              gameId === 'game4' ? '60h 10m' :
-              gameId === 'game5' ? '130h 55m' :
+      gameId === 'game2' ? '120h 15m' :
+        gameId === 'game3' ? '80h 42m' :
+          gameId === 'game4' ? '60h 10m' :
+            gameId === 'game5' ? '130h 55m' :
               gameId === 'game6' ? '95h 30m' : '0h',
     lastPlayed: gameId === 'game1' ? '2 hours ago' :
-                gameId === 'game2' ? 'yesterday' :
-                gameId === 'game3' ? '3 days ago' :
-                'Never',
+      gameId === 'game2' ? 'yesterday' :
+        gameId === 'game3' ? '3 days ago' :
+          'Never',
     description: 'This is a placeholder description for the game. In a real application, this would contain a detailed description of the game, its features, storyline, and other relevant information.',
     achievements: {
       total: 50,
       unlocked: gameId === 'game1' ? 25 :
-                gameId === 'game2' ? 30 :
-                gameId === 'game3' ? 15 : 0,
+        gameId === 'game2' ? 30 :
+          gameId === 'game3' ? 15 : 0,
     },
     dlc: [
       { name: 'Expansion 1', installed: true },
@@ -699,7 +887,7 @@ const GameDetail = ({ gameId, onBack }: GameDetailProps) => {
             <CardContent className="p-4">
               <h2 className="text-xl font-semibold mb-2">Description</h2>
               <p className="text-muted-foreground">{gameDetails.description}</p>
-              
+
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div>
                   <h3 className="text-sm font-medium">Developer</h3>
@@ -775,8 +963,8 @@ const GameDetail = ({ gameId, onBack }: GameDetailProps) => {
                     </div>
                   </div>
                   <div className="w-full bg-secondary h-2 rounded-full mt-2">
-                    <div 
-                      className="bg-primary h-2 rounded-full" 
+                    <div
+                      className="bg-primary h-2 rounded-full"
                       style={{ width: `${(gameDetails.achievements.unlocked / gameDetails.achievements.total) * 100}%` }}
                     ></div>
                   </div>
@@ -821,58 +1009,79 @@ const GameDetail = ({ gameId, onBack }: GameDetailProps) => {
   );
 };
 
+function SettingsProvider({ children }: { children: ReactNode }) {
+  const [settings, setSettings] = useState<AppSettings>({
+    theme: 'dark',
+    systemMetricsEnabled: true
+  });
+
+  const updateSettings = useCallback((newSettings: Partial<AppSettings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
+  }, []);
+
+  return (
+    <SettingsContext.Provider value={{ settings, updateSettings }}>
+      {children}
+    </SettingsContext.Provider>
+  );
+}
+
 export default function App(): JSX.Element {
   const [currentView, setCurrentView] = useState<string>('dashboard');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
-  
+
   // Placeholder for custom hooks
   const libraryStatus: LibraryStatus = { totalGames: 3, scanning: false };
-  const settings: AppSettings = { theme: 'dark' };
-  
+
   useEffect(() => {
     // Simulate loading time
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    
+
     return () => clearTimeout(timer);
   }, []);
-  
+
   if (isLoading) {
     return <LoadingScreen />;
   }
-  
+
   const handleGameSelect = (gameId: string): void => {
     setSelectedGameId(gameId);
     setCurrentView('game-detail');
   };
-  
   return (
-    <ThemeProvider defaultTheme={settings.theme} storageKey="ui-theme">
-      <div className="h-screen flex flex-col bg-background text-foreground">
-        <TopBar />
-        <div className="flex flex-1 overflow-hidden">
-          <SideNav 
-            currentView={currentView} 
-            onChange={setCurrentView}
-            libraryStatus={libraryStatus}
-          />
-          <main className="flex-1 overflow-auto">
-            {currentView === 'dashboard' && <Dashboard onGameSelect={handleGameSelect} />}
-            {currentView === 'library' && <Library onGameSelect={handleGameSelect} />}
-            {currentView === 'screenshots' && <Screenshots />}
-            {currentView === 'analytics' && <Analytics />}
-            {currentView === 'settings' && <Settings />}
-            {currentView === 'game-detail' && selectedGameId && (
-              <GameDetail 
-                gameId={selectedGameId} 
-                onBack={() => setCurrentView('library')} 
-              />
-            )}
-          </main>
-        </div>
-      </div>
-    </ThemeProvider>
+    <SettingsProvider>
+      <SettingsContext.Consumer>
+        {({ settings }) => (
+          <ThemeProvider defaultTheme={settings.theme} storageKey="ui-theme">
+            <div className="h-screen flex flex-col bg-background text-foreground">
+              <TopBar />
+              <div className="flex flex-1 overflow-hidden">
+                <SideNav
+                  currentView={currentView}
+                  onChange={setCurrentView}
+                  libraryStatus={libraryStatus}
+                />
+                <main className="flex-1 overflow-auto">
+                  {currentView === 'dashboard' && <Dashboard onGameSelect={handleGameSelect} />}
+                  {currentView === 'library' && <Library onGameSelect={handleGameSelect} />}
+                  {currentView === 'screenshots' && <Screenshots />}
+                  {currentView === 'analytics' && <Analytics />}
+                  {currentView === 'settings' && <Settings />}
+                  {currentView === 'game-detail' && selectedGameId && (
+                    <GameDetail
+                      gameId={selectedGameId}
+                      onBack={() => setCurrentView('library')}
+                    />
+                  )}
+                </main>
+              </div>
+            </div>
+          </ThemeProvider>
+        )}
+      </SettingsContext.Consumer>
+    </SettingsProvider>
   );
 }

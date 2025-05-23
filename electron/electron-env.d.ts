@@ -23,5 +23,25 @@ declare namespace NodeJS {
 
 // Used in Renderer process, expose in `preload.ts`
 interface Window {
-  ipcRenderer: import('electron').IpcRenderer
+  ipcRenderer: import('electron').IpcRenderer & {
+    invoke(channel: 'get-system-info'): Promise<{
+      cpu: string;
+      memory: string;
+      gpu: string;
+      storage: string;
+    }>;
+    on(channel: 'system-info-update', listener: (event: any, info: {
+      cpu: string;
+      memory: string;
+      gpu: string;
+      storage: string;
+    }) => void): void;
+    off(channel: 'system-info-update', listener: Function): void;
+    getSystemInfo(): Promise<{
+      cpu: string;
+      memory: string;
+      gpu: string;
+      storage: string;
+    }>;
+  }
 }

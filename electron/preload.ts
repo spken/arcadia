@@ -18,7 +18,8 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     const [channel, ...omit] = args
     return ipcRenderer.invoke(channel, ...omit)
   },
-
-  // You can expose other APTs you need here.
-  // ...
+  
+  getSystemInfo() {
+    return ipcRenderer.invoke('get-system-info')
+  },
 })

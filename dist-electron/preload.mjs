@@ -16,7 +16,8 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   invoke(...args) {
     const [channel, ...omit] = args;
     return electron.ipcRenderer.invoke(channel, ...omit);
+  },
+  getSystemInfo() {
+    return electron.ipcRenderer.invoke("get-system-info");
   }
-  // You can expose other APTs you need here.
-  // ...
 });
