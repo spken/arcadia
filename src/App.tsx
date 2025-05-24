@@ -383,7 +383,7 @@ const Dashboard = ({ onGameSelect }: GameActionProps) => {
                 {loading.storage ? (
                   <div className="w-16 h-5 bg-muted rounded animate-pulse"></div>
                 ) : (
-                  systemStats.storage.split(' ')[0] + ' GB Free'
+                  systemStats.storage.split(' ')[0] + ' GB free'
                 )}
               </div>
               <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
