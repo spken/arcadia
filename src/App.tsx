@@ -1,9 +1,40 @@
 import { useState, useEffect, useCallback, ReactNode, createContext, useContext } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { 
+  ImageIcon, 
+  BarChart3, 
+  Settings as SettingsIcon, 
+  Cpu, 
+  HardDrive, 
+  Activity, 
+  Gamepad, 
+  Play, 
+  RefreshCw,
+  Sparkles,
+  Filter,
+  ArrowUpDown,
+  Plus,
+  CheckCircle,
+  Download,
+  Star,
+  Clock,
+  MoreHorizontal,
+  Camera,
+  TrendingUp,
+  Users,
+  Zap,
+  Monitor,
+  Palette,
+  Globe,
+  Shield,
+  Info,
+  ChevronLeft,
+  ExternalLink
+} from 'lucide-react';
 
 // Define types for props
 interface ThemeProviderProps {
@@ -94,25 +125,26 @@ const LoadingScreen = () => (
 
 // Placeholder page components
 const Dashboard = ({ onGameSelect }: GameActionProps) => {
-  const { settings } = useSettings();
-  // Placeholder data for games
   const recentGames = [
-    { id: 'game1', name: 'Cyberpunk 2077', lastPlayed: '2 hours ago', playtime: '45h' },
-    { id: 'game2', name: 'Elden Ring', lastPlayed: 'yesterday', playtime: '120h' },
-    { id: 'game3', name: 'Baldur\'s Gate 3', lastPlayed: '3 days ago', playtime: '80h' }
+    { id: 'game1', name: 'Cyberpunk 2077', lastPlayed: '2 hours ago' },
+    { id: 'game2', name: 'Elden Ring', lastPlayed: 'yesterday' },
+    { id: 'game3', name: 'Baldur\'s Gate 3', lastPlayed: '3 days ago' }
   ];
+
   const [systemStats, setSystemStats] = useState({
     cpu: '0%',
     memory: '0 GB / 0 GB',
     gpu: '0%',
     storage: '0 GB free'
   });
+  
   const [loading, setLoading] = useState({
     cpu: true,
     memory: true,
     gpu: true,
     storage: true
   });
+
   const handleSystemInfoUpdate = useCallback((_event: any, info: any) => {
     setSystemStats(prevStats => {
       if (
@@ -130,10 +162,6 @@ const Dashboard = ({ onGameSelect }: GameActionProps) => {
 
   useEffect(() => {
     let isMounted = true;
-    
-    if (!settings.systemMetricsEnabled) {
-      return;
-    }
     
     setLoading({cpu: true, memory: true, gpu: true, storage: true});
     
@@ -155,288 +183,465 @@ const Dashboard = ({ onGameSelect }: GameActionProps) => {
       isMounted = false;
       window.ipcRenderer.off('system-info-update', handleSystemInfoUpdate);
     };
-  }, [handleSystemInfoUpdate, settings.systemMetricsEnabled]);
+  }, [handleSystemInfoUpdate]);
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header with gradient title */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Welcome back</h1>
-        <Button variant="outline">Refresh Library</Button>
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            Welcome back, Player
+          </h1>
+        </div>
+        <Button variant="outline" className="gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Refresh Library
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="col-span-2">
-          <CardHeader>
+      {/* Recent Games */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Gamepad className="h-5 w-5" />
             <CardTitle>Recent Games</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentGames.map(game => (
-                <div key={game.id} className="flex items-center justify-between border-b pb-3">
-                  <div>
-                    <h3 className="font-medium">{game.name}</h3>
-                    <p className="text-sm text-muted-foreground">Last played: {game.lastPlayed}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{game.playtime}</Badge>
-                    <Button size="sm" onClick={() => onGameSelect(game.id)}>Play</Button>
-                  </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {recentGames.map((game) => (
+              <div 
+                key={game.id} 
+                className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                onClick={() => onGameSelect(game.id)}
+              >
+                <div>
+                  <h3 className="font-medium">{game.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Last played: {game.lastPlayed}
+                  </p>
                 </div>
-              ))}
+                <Button size="sm" variant="outline">
+                  <Play className="h-4 w-4 mr-1" />
+                  Play
+                </Button>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Gamepad className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">24</p>
+                <p className="text-sm text-muted-foreground">Games in Library</p>
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>          
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-center">
-              <CardTitle>System Status</CardTitle>
-              {!settings.systemMetricsEnabled ? (
-                <Badge variant="destructive">Disabled</Badge>
-              ) : (loading.cpu || loading.memory || loading.gpu || loading.storage) ? (
-                <Badge variant="outline" className="animate-pulse">
-                  Loading...
-                </Badge>
-              ) : (
-                <Badge variant={systemStats.cpu !== 'Error' ? "success" : "destructive"}>
-                  {systemStats.cpu !== 'Error' ? 'Live' : 'Error'}
-                </Badge>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {!settings.systemMetricsEnabled ? (
-              <div className="flex flex-col items-center justify-center py-4 opacity-60">
-                <p className="text-sm text-muted-foreground text-center mb-2">System metrics are disabled</p>
-                <p className="text-xs text-muted-foreground text-center">Enable them in Settings to see live system information</p>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-green-600" />
               </div>
+              <div>
+                <p className="text-2xl font-bold">12</p>
+                <p className="text-sm text-muted-foreground">Installed</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Clock className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">45h</p>
+                <p className="text-sm text-muted-foreground">This Month</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>      </div>
+
+      {/* System Metrics */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            <CardTitle>System Metrics</CardTitle>
+            {loading.cpu || loading.memory || loading.gpu || loading.storage ? (
+              <Badge variant="outline" className="ml-auto">
+                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                Loading...
+              </Badge>
             ) : (
-              /* CPU Usage */
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">CPU Usage</span>
-                    <span className="text-sm font-medium">
-                      {loading.cpu ? (
-                        <span className="inline-block w-12 h-4 bg-secondary rounded animate-pulse"></span>
-                      ) : (
-                        systemStats.cpu
-                      )}
-                    </span>
-                  </div>
-                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
-                    {loading.cpu ? (
-                      <div className="h-full w-full bg-gradient-to-r from-primary/30 to-primary/60 animate-pulse"></div>
-                    ) : (
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
-                        style={{ width: `${systemStats.cpu !== 'Error' ? parseInt(systemStats.cpu) : 0}%` }}
-                      ></div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Memory Usage */}
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">Memory</span>
-                    <span className="text-sm font-medium">
-                      {loading.memory ? (
-                        <span className="inline-block w-24 h-4 bg-secondary rounded animate-pulse"></span>
-                      ) : (
-                        systemStats.memory
-                      )}
-                    </span>
-                  </div>
-                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
-                    {loading.memory ? (
-                      <div className="h-full w-full bg-gradient-to-r from-primary/30 to-primary/60 animate-pulse"></div>
-                    ) : (
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
-                        style={{
-                          width: systemStats.memory !== 'Error'
-                            ? `${(parseFloat(systemStats.memory.split(' ')[0]) / parseFloat(systemStats.memory.split(' ')[3])) * 100}%`
-                            : '0%'
-                        }}
-                      ></div>
-                    )}
-                  </div>
-                </div>
-
-                {/* GPU Usage */}
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">GPU Usage</span>
-                    <span className="text-sm font-medium">
-                      {loading.gpu ? (
-                        <span className="inline-block w-12 h-4 bg-secondary rounded animate-pulse"></span>
-                      ) : (
-                        systemStats.gpu
-                      )}
-                    </span>
-                  </div>
-                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
-                    {loading.gpu ? (
-                      <div className="h-full w-full bg-gradient-to-r from-primary/30 to-primary/60 animate-pulse"></div>
-                    ) : (
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
-                        style={{ width: `${systemStats.gpu !== 'Error' && systemStats.gpu !== 'N/A' ? parseInt(systemStats.gpu) : 0}%` }}
-                      ></div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Storage */}
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">Storage</span>
-                    <span className="text-sm font-medium text-right">
-                      {loading.storage ? (
-                        <span className="inline-block w-32 h-4 bg-secondary rounded animate-pulse"></span>
-                      ) : (
-                        systemStats.storage
-                      )}
-                    </span>
-                  </div>
-                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
-                    {loading.storage ? (
-                      <div className="h-full w-full bg-gradient-to-r from-primary/30 to-primary/60 animate-pulse"></div>
-                    ) : (
-                      systemStats.storage !== 'Error' && (
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
-                          style={{
-                            width: `${100 - (parseFloat(systemStats.storage.split(' ')[0]) / parseFloat(systemStats.storage.split(' ')[4])) * 100}%`
-                          }}
-                        ></div>
-                      )
-                    )}
-                  </div>
-                </div>
-              </div>
+              <Badge variant="success" className="ml-auto">
+                Live
+              </Badge>
             )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Library Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* CPU Usage */}
             <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Total Games</span>
-                <span className="font-medium">24</span>
+              <div className="flex items-center gap-2">
+                <Cpu className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium">CPU</span>
               </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span>Installed</span>
-                <span className="font-medium">12</span>
+              <div className="text-lg font-bold text-blue-600">
+                {loading.cpu ? (
+                  <div className="w-12 h-5 bg-muted rounded animate-pulse"></div>
+                ) : (
+                  systemStats.cpu
+                )}
               </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span>Available Updates</span>
-                <span className="font-medium">3</span>
+              <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                {loading.cpu ? (
+                  <div className="h-full w-full bg-blue-500/30 animate-pulse"></div>
+                ) : (
+                  <div
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                    style={{ width: `${systemStats.cpu !== 'Error' ? parseInt(systemStats.cpu) : 0}%` }}
+                  ></div>
+                )}
               </div>
             </div>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={() => onGameSelect('game1')} variant="outline" className="w-full">
-              View Library
-            </Button>
-          </CardFooter>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Game Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-6">
-              <p className="text-2xl font-bold">45h</p>
-              <p className="text-sm text-muted-foreground">Total playtime this month</p>
+            {/* Memory Usage */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <HardDrive className="h-4 w-4 text-purple-600" />
+                <span className="text-sm font-medium">Memory</span>
+              </div>
+              <div className="text-lg font-bold text-purple-600">
+                {loading.memory ? (
+                  <div className="w-16 h-5 bg-muted rounded animate-pulse"></div>
+                ) : (
+                  systemStats.memory.split(' / ')[0]
+                )}
+              </div>
+              <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                {loading.memory ? (
+                  <div className="h-full w-full bg-purple-500/30 animate-pulse"></div>
+                ) : (
+                  <div
+                    className="bg-purple-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                    style={{
+                      width: systemStats.memory !== 'Error'
+                        ? `${(parseFloat(systemStats.memory.split(' ')[0]) / parseFloat(systemStats.memory.split(' ')[3])) * 100}%`
+                        : '0%'
+                    }}
+                  ></div>
+                )}
+              </div>
             </div>
-            <div className="grid grid-cols-3 text-center">
-              <div>
-                <p className="font-medium">12</p>
-                <p className="text-xs text-muted-foreground">Games Played</p>
+
+            {/* GPU Usage */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-yellow-600" />
+                <span className="text-sm font-medium">GPU</span>
               </div>
-              <div>
-                <p className="font-medium">3</p>
-                <p className="text-xs text-muted-foreground">Achievements</p>
+              <div className="text-lg font-bold text-yellow-600">
+                {loading.gpu ? (
+                  <div className="w-12 h-5 bg-muted rounded animate-pulse"></div>
+                ) : (
+                  systemStats.gpu
+                )}
               </div>
-              <div>
-                <p className="font-medium">8h</p>
-                <p className="text-xs text-muted-foreground">Weekly Avg.</p>
+              <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                {loading.gpu ? (
+                  <div className="h-full w-full bg-yellow-500/30 animate-pulse"></div>
+                ) : (
+                  <div
+                    className="bg-yellow-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                    style={{ width: `${systemStats.gpu !== 'Error' && systemStats.gpu !== 'N/A' ? parseInt(systemStats.gpu) : 0}%` }}
+                  ></div>
+                )}
               </div>
             </div>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={() => onGameSelect('game1')} variant="outline" className="w-full">
-              View Analytics
-            </Button>
-          </CardFooter>
-        </Card>
+
+            {/* Storage */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <HardDrive className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium">Storage</span>
+              </div>
+              <div className="text-lg font-bold text-green-600">
+                {loading.storage ? (
+                  <div className="w-16 h-5 bg-muted rounded animate-pulse"></div>
+                ) : (
+                  systemStats.storage.split(' ')[0] + ' GB Free'
+                )}
+              </div>
+              <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                {loading.storage ? (
+                  <div className="h-full w-full bg-green-500/30 animate-pulse"></div>
+                ) : (
+                  systemStats.storage !== 'Error' && (
+                    <div
+                      className="bg-green-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                      style={{
+                        width: `${100 - (parseFloat(systemStats.storage.split(' ')[0]) / parseFloat(systemStats.storage.split(' ')[4])) * 100}%`
+                      }}
+                    ></div>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Button 
+          onClick={() => onGameSelect('game1')} 
+          variant="outline" 
+          className="h-16 text-left justify-start gap-3"
+        >
+          <Activity className="h-5 w-5" />
+          <div>
+            <div className="font-medium">View Library</div>
+            <div className="text-sm text-muted-foreground">Browse all your games</div>
+          </div>
+        </Button>
+
+        <Button 
+          onClick={() => onGameSelect('game1')} 
+          variant="outline" 
+          className="h-16 text-left justify-start gap-3"
+        >
+          <BarChart3 className="h-5 w-5" />
+          <div>
+            <div className="font-medium">View Analytics</div>
+            <div className="text-sm text-muted-foreground">See your gaming stats</div>
+          </div>
+        </Button>
       </div>
     </div>
   );
 };
 
 const Library = ({ onGameSelect }: GameActionProps) => {
-  // Placeholder game data
+  // Enhanced game data with additional properties
   const games = [
-    { id: 'game1', name: 'Cyberpunk 2077', developer: 'CD Projekt Red', installed: true, size: '65.2 GB' },
-    { id: 'game2', name: 'Elden Ring', developer: 'FromSoftware', installed: true, size: '44.7 GB' },
-    { id: 'game3', name: 'Baldur\'s Gate 3', developer: 'Larian Studios', installed: true, size: '122.0 GB' },
-    { id: 'game4', name: 'Red Dead Redemption 2', developer: 'Rockstar Games', installed: false, size: '112.5 GB' },
-    { id: 'game5', name: 'The Witcher 3', developer: 'CD Projekt Red', installed: false, size: '50.0 GB' },
-    { id: 'game6', name: 'Mass Effect Legendary', developer: 'BioWare', installed: false, size: '120.0 GB' },
+    { 
+      id: 'game1', 
+      name: 'Cyberpunk 2077', 
+      developer: 'CD Projekt Red', 
+      installed: true, 
+      size: '65.2 GB',
+      playtime: '45h',
+      lastPlayed: '2 hours ago',
+      rating: 4.2,
+      color: 'from-yellow-500 to-orange-600'
+    },
+    { 
+      id: 'game2', 
+      name: 'Elden Ring', 
+      developer: 'FromSoftware', 
+      installed: true, 
+      size: '44.7 GB',
+      playtime: '120h',
+      lastPlayed: 'yesterday',
+      rating: 4.8,
+      color: 'from-amber-500 to-yellow-600'
+    },
+    { 
+      id: 'game3', 
+      name: 'Baldur\'s Gate 3', 
+      developer: 'Larian Studios', 
+      installed: true, 
+      size: '122.0 GB',
+      playtime: '80h',
+      lastPlayed: '3 days ago',
+      rating: 4.7,
+      color: 'from-purple-500 to-pink-600'
+    },
+    { 
+      id: 'game4', 
+      name: 'Red Dead Redemption 2', 
+      developer: 'Rockstar Games', 
+      installed: false, 
+      size: '112.5 GB',
+      playtime: '0h',
+      lastPlayed: 'never',
+      rating: 4.5,
+      color: 'from-red-500 to-orange-600'
+    },
+    { 
+      id: 'game5', 
+      name: 'The Witcher 3', 
+      developer: 'CD Projekt Red', 
+      installed: false, 
+      size: '50.0 GB',
+      playtime: '0h',
+      lastPlayed: 'never',
+      rating: 4.6,
+      color: 'from-gray-500 to-slate-600'
+    },
+    { 
+      id: 'game6', 
+      name: 'Mass Effect Legendary', 
+      developer: 'BioWare', 
+      installed: false, 
+      size: '120.0 GB',
+      playtime: '0h',
+      lastPlayed: 'never',
+      rating: 4.4,
+      color: 'from-blue-500 to-indigo-600'
+    },
   ];
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Game Library</h1>
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            Game Library
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {games.filter(g => g.installed).length} of {games.length} games installed
+          </p>
+        </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">Filter</Button>
-          <Button variant="outline" size="sm">Sort</Button>
-          <Button variant="default" size="sm">Add Game</Button>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Filter className="h-4 w-4" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2">
+            <ArrowUpDown className="h-4 w-4" />
+            Sort
+          </Button>
+          <Button variant="default" size="sm" className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Game
+          </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {games.map(game => (
-          <Card key={game.id} className="overflow-hidden">
+        {games.map((game, index) => (
+          <Card 
+            key={game.id} 
+            className="overflow-hidden hover-scale transition-all duration-300 hover:shadow-xl group animate-fade-in"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
             <div
-              className="h-36 bg-accent flex items-center justify-center cursor-pointer"
+              className={`relative h-40 bg-gradient-to-br ${game.color} flex items-center justify-center cursor-pointer transition-all duration-300 group-hover:scale-105`}
               onClick={() => onGameSelect(game.id)}
             >
-              <div className="text-2xl font-bold text-muted-foreground">
-                {game.name.substring(0, 1)}
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
+              <div className="relative">
+                <div className="text-4xl font-bold text-white drop-shadow-lg">
+                  {game.name.substring(0, 1)}
+                </div>
+                {game.installed && (
+                  <div className="absolute -top-2 -right-2">
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                      <CheckCircle className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                )}
               </div>
+              
+              {/* Play overlay */}
+              {game.installed && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
+                    <Play className="h-8 w-8 text-white fill-current" />
+                  </div>
+                </div>
+              )}
             </div>
+            
             <CardContent className="p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium">{game.name}</h3>
-                <Badge variant={game.installed ? "secondary" : "outline"}>
-                  {game.installed ? "Installed" : "Not Installed"}
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg leading-tight mb-1">{game.name}</h3>
+                  <p className="text-sm text-muted-foreground">{game.developer}</p>
+                </div>
+                <Badge 
+                  variant={game.installed ? "default" : "outline"}
+                  className={game.installed ? "bg-green-500/20 text-green-700 border-green-500/30" : ""}
+                >
+                  {game.installed ? (
+                    <div className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" />
+                      Installed
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <Download className="h-3 w-3" />
+                      Not Installed
+                    </div>
+                  )}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">{game.developer}</p>
-              <p className="text-sm text-muted-foreground">{game.size}</p>
-              <div className="flex gap-2 mt-4">
+              
+              {/* Game Stats */}
+              <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+                <div className="bg-muted/50 rounded-lg p-2">
+                  <div className="text-xs text-muted-foreground">Size</div>
+                  <div className="text-sm font-medium">{game.size}</div>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-2">
+                  <div className="text-xs text-muted-foreground">Playtime</div>
+                  <div className="text-sm font-medium">{game.playtime}</div>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-2">
+                  <div className="text-xs text-muted-foreground">Rating</div>
+                  <div className="text-sm font-medium flex items-center justify-center gap-1">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    {game.rating}
+                  </div>
+                </div>
+              </div>
+              
+              {game.installed && game.lastPlayed !== 'never' && (
+                <div className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Last played: {game.lastPlayed}
+                </div>
+              )}
+              
+              <div className="flex gap-2">
                 <Button
-                  variant="default"
+                  variant={game.installed ? "default" : "secondary"}
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 gap-2"
                   onClick={() => onGameSelect(game.id)}
                 >
-                  {game.installed ? "Play" : "Install"}
+                  {game.installed ? (
+                    <>
+                      <Play className="h-4 w-4" />
+                      Play
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      Install
+                    </>
+                  )}
                 </Button>
-                <Button variant="outline" size="sm">•••</Button>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -447,44 +652,199 @@ const Library = ({ onGameSelect }: GameActionProps) => {
 };
 
 const Screenshots = () => {
-  // Placeholder screenshot data
+  // Enhanced screenshot data with categories and metadata
   const screenshots = [
-    { id: 'ss1', game: 'Cyberpunk 2077', date: 'May 15, 2025', size: '4.2 MB' },
-    { id: 'ss2', game: 'Elden Ring', date: 'May 10, 2025', size: '3.8 MB' },
-    { id: 'ss3', game: 'Baldur\'s Gate 3', date: 'May 8, 2025', size: '5.1 MB' },
-    { id: 'ss4', game: 'Cyberpunk 2077', date: 'May 7, 2025', size: '4.5 MB' },
-    { id: 'ss5', game: 'Red Dead Redemption 2', date: 'May 5, 2025', size: '6.2 MB' },
-    { id: 'ss6', game: 'Elden Ring', date: 'May 3, 2025', size: '3.5 MB' },
+    { 
+      id: 'ss1', 
+      game: 'Cyberpunk 2077', 
+      date: 'May 15, 2025', 
+      size: '4.2 MB',
+      category: 'Action',
+      resolution: '1920x1080',
+      color: 'from-yellow-500 to-orange-600'
+    },
+    { 
+      id: 'ss2', 
+      game: 'Elden Ring', 
+      date: 'May 10, 2025', 
+      size: '3.8 MB',
+      category: 'Scenic',
+      resolution: '2560x1440',
+      color: 'from-amber-500 to-yellow-600'
+    },
+    { 
+      id: 'ss3', 
+      game: 'Baldur\'s Gate 3', 
+      date: 'May 8, 2025', 
+      size: '5.1 MB',
+      category: 'Character',
+      resolution: '1920x1080',
+      color: 'from-purple-500 to-pink-600'
+    },
+    { 
+      id: 'ss4', 
+      game: 'Cyberpunk 2077', 
+      date: 'May 7, 2025', 
+      size: '4.5 MB',
+      category: 'Action',
+      resolution: '1920x1080',
+      color: 'from-yellow-500 to-orange-600'
+    },
+    { 
+      id: 'ss5', 
+      game: 'Red Dead Redemption 2', 
+      date: 'May 5, 2025', 
+      size: '6.2 MB',
+      category: 'Scenic',
+      resolution: '3840x2160',
+      color: 'from-red-500 to-orange-600'
+    },
+    { 
+      id: 'ss6', 
+      game: 'Elden Ring', 
+      date: 'May 3, 2025', 
+      size: '3.5 MB',
+      category: 'Combat',
+      resolution: '2560x1440',
+      color: 'from-amber-500 to-yellow-600'
+    },
   ];
+
+  const stats = {
+    total: screenshots.length,
+    totalSize: screenshots.reduce((acc, ss) => acc + parseFloat(ss.size), 0).toFixed(1),
+    categories: {
+      'Action': screenshots.filter(s => s.category === 'Action').length,
+      'Scenic': screenshots.filter(s => s.category === 'Scenic').length,
+      'Character': screenshots.filter(s => s.category === 'Character').length,
+      'Combat': screenshots.filter(s => s.category === 'Combat').length,
+    }
+  };
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Screenshots</h1>
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+            Screenshots
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {stats.total} screenshots • {stats.totalSize} MB total
+          </p>
+        </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">Filter by Game</Button>
-          <Button variant="default" size="sm">Import</Button>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Filter className="h-4 w-4" />
+            Filter by Game
+          </Button>
+          <Button variant="default" size="sm" className="gap-2">
+            <Camera className="h-4 w-4" />
+            Import
+          </Button>
         </div>
       </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
+            <div className="text-sm text-muted-foreground">Total Screenshots</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">{stats.totalSize} MB</div>
+            <div className="text-sm text-muted-foreground">Storage Used</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/20">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-orange-600">{stats.categories.Action + stats.categories.Combat}</div>
+            <div className="text-sm text-muted-foreground">Action Shots</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-purple-600">{stats.categories.Scenic}</div>
+            <div className="text-sm text-muted-foreground">Scenic Views</div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {screenshots.map(screenshot => (
-          <Card key={screenshot.id} className="overflow-hidden">
-            <div className="h-48 bg-accent flex items-center justify-center">
-              <div className="text-muted-foreground font-bold">
-                Screenshot Preview
+        {screenshots.map((screenshot, index) => (
+          <Card 
+            key={screenshot.id} 
+            className="overflow-hidden hover-scale transition-all duration-300 hover:shadow-xl group animate-fade-in"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <div className={`relative h-48 bg-gradient-to-br ${screenshot.color} flex items-center justify-center overflow-hidden`}>
+              <div className="absolute inset-0 bg-black/20" />
+              <div className="relative z-10">
+                <div className="text-white font-bold text-lg mb-2 text-center drop-shadow-lg">
+                  Screenshot Preview
+                </div>
+                <div className="flex items-center justify-center gap-2 text-white/80 text-sm">
+                  <ImageIcon className="h-4 w-4" />
+                  {screenshot.resolution}
+                </div>
+              </div>
+              
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Category badge */}
+              <div className="absolute top-3 left-3 z-10">
+                <Badge 
+                  variant="secondary" 
+                  className="bg-black/40 backdrop-blur-sm text-white border-white/20"
+                >
+                  {screenshot.category}
+                </Badge>
               </div>
             </div>
+            
             <CardContent className="p-4">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium">{screenshot.game}</h3>
-                <Badge variant="outline">{screenshot.size}</Badge>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-medium truncate flex-1">{screenshot.game}</h3>
+                <Badge variant="outline" className="text-xs">
+                  {screenshot.size}
+                </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">{screenshot.date}</p>
-              <div className="flex gap-2 mt-4">
-                <Button variant="outline" size="sm" className="flex-1">View</Button>
-                <Button variant="outline" size="sm" className="flex-1">Share</Button>
-                <Button variant="outline" size="sm" className="flex-1">Delete</Button>
+              
+              <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {screenshot.date}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Monitor className="h-3 w-3" />
+                  {screenshot.resolution}
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1 gap-1">
+                  <ExternalLink className="h-3 w-3" />
+                  View
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1 gap-1">
+                  <Users className="h-3 w-3" />
+                  Share
+                </Button>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <MoreHorizontal className="h-3 w-3" />
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -495,49 +855,165 @@ const Screenshots = () => {
 };
 
 const Analytics = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState('This Week');
+  
+  const analyticsData = {
+    totalPlayTime: selectedPeriod === 'This Week' ? '45h' : selectedPeriod === 'This Month' ? '180h' : '2,400h',
+    gamesPlayed: selectedPeriod === 'This Week' ? 12 : selectedPeriod === 'This Month' ? 35 : 150,
+    achievements: selectedPeriod === 'This Week' ? 24 : selectedPeriod === 'This Month' ? 95 : 1240,
+    weeklyAverage: selectedPeriod === 'This Week' ? '8.5h' : selectedPeriod === 'This Month' ? '7.2h' : '6.8h',
+  };
+
+  const topGames = [
+    { 
+      name: 'Elden Ring', 
+      developer: 'FromSoftware', 
+      playtime: '120h 15m', 
+      sessions: 45,
+      color: 'from-amber-500 to-yellow-600',
+      percentage: 95
+    },
+    { 
+      name: 'The Witcher 3', 
+      developer: 'CD Projekt Red', 
+      playtime: '130h 55m', 
+      sessions: 38,
+      color: 'from-gray-500 to-slate-600',
+      percentage: 85
+    },
+    { 
+      name: 'Baldur\'s Gate 3', 
+      developer: 'Larian Studios', 
+      playtime: '80h 42m', 
+      sessions: 22,
+      color: 'from-purple-500 to-pink-600',
+      percentage: 65
+    },
+    { 
+      name: 'Cyberpunk 2077', 
+      developer: 'CD Projekt Red', 
+      playtime: '45h 23m', 
+      sessions: 18,
+      color: 'from-yellow-500 to-orange-600',
+      percentage: 40
+    },
+  ];
+
+  const weeklyActivity = [
+    { day: 'Mon', hours: 2.5 },
+    { day: 'Tue', hours: 4.2 },
+    { day: 'Wed', hours: 1.8 },
+    { day: 'Thu', hours: 6.1 },
+    { day: 'Fri', hours: 3.7 },
+    { day: 'Sat', hours: 8.5 },
+    { day: 'Sun', hours: 5.3 },
+  ];
+
+  const recentSessions = [
+    { 
+      game: 'Cyberpunk 2077', 
+      date: 'May 24, 2025', 
+      duration: '2h 15m', 
+      badge: 'Today',
+      badgeVariant: 'default' as const,
+      color: 'from-yellow-500 to-orange-600'
+    },
+    { 
+      game: 'Elden Ring', 
+      date: 'May 23, 2025', 
+      duration: '3h 45m', 
+      badge: 'Yesterday',
+      badgeVariant: 'outline' as const,
+      color: 'from-amber-500 to-yellow-600'
+    },
+    { 
+      game: 'Baldur\'s Gate 3', 
+      date: 'May 22, 2025', 
+      duration: '5h 10m', 
+      badge: '2 days ago',
+      badgeVariant: 'outline' as const,
+      color: 'from-purple-500 to-pink-600'
+    },
+    { 
+      game: 'The Witcher 3', 
+      date: 'May 21, 2025', 
+      duration: '4h 30m', 
+      badge: '3 days ago',
+      badgeVariant: 'outline' as const,
+      color: 'from-gray-500 to-slate-600'
+    },
+  ];
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Analytics</h1>
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+            Gaming Analytics
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Track your gaming habits and performance
+          </p>
+        </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">This Week</Button>
-          <Button variant="outline" size="sm">This Month</Button>
-          <Button variant="outline" size="sm">All Time</Button>
+          {['This Week', 'This Month', 'All Time'].map((period) => (
+            <Button 
+              key={period}
+              variant={selectedPeriod === period ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setSelectedPeriod(period)}
+            >
+              {period}
+            </Button>
+          ))}
         </div>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <Card>
+        <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20 hover-scale animate-fade-in">
           <CardContent className="pt-6">
             <div className="text-center">
-              <h3 className="text-3xl font-bold">45h</h3>
+              <div className="flex items-center justify-center mb-2">
+                <Clock className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="text-3xl font-bold text-blue-600">{analyticsData.totalPlayTime}</h3>
               <p className="text-sm text-muted-foreground">Total Play Time</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20 hover-scale animate-fade-in" style={{ animationDelay: '100ms' }}>
           <CardContent className="pt-6">
             <div className="text-center">
-              <h3 className="text-3xl font-bold">12</h3>
+              <div className="flex items-center justify-center mb-2">
+                <Gamepad className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="text-3xl font-bold text-green-600">{analyticsData.gamesPlayed}</h3>
               <p className="text-sm text-muted-foreground">Games Played</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-500/20 hover-scale animate-fade-in" style={{ animationDelay: '200ms' }}>
           <CardContent className="pt-6">
             <div className="text-center">
-              <h3 className="text-3xl font-bold">24</h3>
+              <div className="flex items-center justify-center mb-2">
+                <Star className="h-6 w-6 text-yellow-600 fill-yellow-600" />
+              </div>
+              <h3 className="text-3xl font-bold text-yellow-600">{analyticsData.achievements}</h3>
               <p className="text-sm text-muted-foreground">Achievements</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20 hover-scale animate-fade-in" style={{ animationDelay: '300ms' }}>
           <CardContent className="pt-6">
             <div className="text-center">
-              <h3 className="text-3xl font-bold">8.5h</h3>
+              <div className="flex items-center justify-center mb-2">
+                <TrendingUp className="h-6 w-6 text-purple-600" />
+              </div>
+              <h3 className="text-3xl font-bold text-purple-600">{analyticsData.weeklyAverage}</h3>
               <p className="text-sm text-muted-foreground">Weekly Average</p>
             </div>
           </CardContent>
@@ -545,99 +1021,120 @@ const Analytics = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <Card>
+        {/* Most Played Games */}
+        <Card className="animate-fade-in" style={{ animationDelay: '400ms' }}>
           <CardHeader>
-            <CardTitle>Most Played Games</CardTitle>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              <CardTitle>Most Played Games</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2 items-center">
-                  <div className="w-8 h-8 bg-accent rounded-md flex items-center justify-center">
-                    <span>E</span>
+              {topGames.map((game, index) => (
+                <div key={game.name} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-3 items-center">
+                      <div className={`w-10 h-10 bg-gradient-to-br ${game.color} rounded-lg flex items-center justify-center text-white font-bold shadow-md`}>
+                        {game.name.substring(0, 1)}
+                      </div>
+                      <div>
+                        <p className="font-medium">{game.name}</p>
+                        <p className="text-xs text-muted-foreground">{game.developer}</p>
+                        <p className="text-xs text-muted-foreground">{game.sessions} sessions</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{game.playtime}</p>
+                      <p className="text-xs text-muted-foreground">{game.percentage}% of total</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">Elden Ring</p>
-                    <p className="text-xs text-muted-foreground">FromSoftware</p>
+                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+                    <div
+                      className={`h-2 rounded-full bg-gradient-to-r ${game.color} transition-all duration-1000 ease-out`}
+                      style={{ 
+                        width: `${game.percentage}%`,
+                        animationDelay: `${500 + index * 200}ms`
+                      }}
+                    ></div>
                   </div>
+                  {index < topGames.length - 1 && <Separator />}
                 </div>
-                <p className="font-medium">120h 15m</p>
-              </div>
-              <Separator />
-
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2 items-center">
-                  <div className="w-8 h-8 bg-accent rounded-md flex items-center justify-center">
-                    <span>W</span>
-                  </div>
-                  <div>
-                    <p className="font-medium">The Witcher 3</p>
-                    <p className="text-xs text-muted-foreground">CD Projekt Red</p>
-                  </div>
-                </div>
-                <p className="font-medium">130h 55m</p>
-              </div>
-              <Separator />
-
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2 items-center">
-                  <div className="w-8 h-8 bg-accent rounded-md flex items-center justify-center">
-                    <span>B</span>
-                  </div>
-                  <div>
-                    <p className="font-medium">Baldur's Gate 3</p>
-                    <p className="text-xs text-muted-foreground">Larian Studios</p>
-                  </div>
-                </div>
-                <p className="font-medium">80h 42m</p>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Gaming Activity Chart */}
+        <Card className="animate-fade-in" style={{ animationDelay: '500ms' }}>
           <CardHeader>
-            <CardTitle>Gaming Activity</CardTitle>
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              <CardTitle>Weekly Activity</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center bg-muted/20 rounded-md">
-              <p className="text-muted-foreground">Activity Chart Placeholder</p>
+            <div className="h-64 flex items-end justify-between gap-2 px-2">
+              {weeklyActivity.map((day, index) => (
+                <div key={day.day} className="flex flex-col items-center flex-1">
+                  <div className="relative w-full h-48 flex items-end">
+                    <div
+                      className="w-full bg-gradient-to-t from-primary to-primary/60 rounded-t-md transition-all duration-1000 ease-out hover:from-primary/80 hover:to-primary/40 cursor-pointer"
+                      style={{ 
+                        height: `${(day.hours / 10) * 100}%`,
+                        minHeight: '8px',
+                        animationDelay: `${600 + index * 100}ms`
+                      }}
+                      title={`${day.hours}h on ${day.day}`}
+                    ></div>
+                  </div>
+                  <div className="mt-2 text-center">
+                    <p className="text-xs font-medium">{day.day}</p>
+                    <p className="text-xs text-muted-foreground">{day.hours}h</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg border border-primary/20">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Peak Gaming Day:</span>
+                <span className="text-sm text-muted-foreground">Saturday with 8.5 hours</span>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      {/* Recent Sessions */}
+      <Card className="animate-fade-in" style={{ animationDelay: '600ms' }}>
         <CardHeader>
-          <CardTitle>Recent Sessions</CardTitle>
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            <CardTitle>Recent Gaming Sessions</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Cyberpunk 2077</h3>
-                <p className="text-sm text-muted-foreground">May 19, 2025 • 2h 15m</p>
+            {recentSessions.map((session, index) => (
+              <div key={`${session.game}-${session.date}`} className="group">
+                <div className="flex justify-between items-center p-3 rounded-lg hover:bg-muted/50 transition-colors duration-200">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 bg-gradient-to-br ${session.color} rounded-lg flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform duration-200`}>
+                      {session.game.substring(0, 1)}
+                    </div>
+                    <div>
+                      <h3 className="font-medium group-hover:text-primary transition-colors duration-200">{session.game}</h3>
+                      <p className="text-sm text-muted-foreground">{session.date} • {session.duration}</p>
+                    </div>
+                  </div>
+                  <Badge variant={session.badgeVariant} className="group-hover:scale-105 transition-transform duration-200">
+                    {session.badge}
+                  </Badge>
+                </div>
+                {index < recentSessions.length - 1 && <Separator />}
               </div>
-              <Badge>Today</Badge>
-            </div>
-            <Separator />
-
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Elden Ring</h3>
-                <p className="text-sm text-muted-foreground">May 18, 2025 • 3h 45m</p>
-              </div>
-              <Badge variant="outline">Yesterday</Badge>
-            </div>
-            <Separator />
-
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Baldur's Gate 3</h3>
-                <p className="text-sm text-muted-foreground">May 17, 2025 • 5h 10m</p>
-              </div>
-              <Badge variant="outline">3 days ago</Badge>
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -649,88 +1146,165 @@ const Settings = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      {/* Enhanced Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            Settings
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Configure your Arcadia experience
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Reset to Defaults
+          </Button>
+        </div>
+      </div>
 
-      <div className="space-y-8 max-w-3xl">
-        <Card>
+      <div className="space-y-6 max-w-4xl">
+        {/* General Settings */}
+        <Card className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border-blue-500/20 hover-scale animate-fade-in">
           <CardHeader>
-            <CardTitle>General</CardTitle>
+            <div className="flex items-center gap-2">
+              <SettingsIcon className="h-5 w-5 text-blue-600" />
+              <CardTitle>General</CardTitle>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Theme</h3>
-                <p className="text-sm text-muted-foreground">Change the appearance of the application</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <Palette className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Theme</h3>
+                  <p className="text-sm text-muted-foreground">Change the appearance of the application</p>
+                </div>
               </div>
-              <Button variant="outline">Dark</Button>
+              <Button variant="outline" className="gap-2">
+                <Monitor className="h-4 w-4" />
+                Dark
+              </Button>
             </div>
             <Separator />
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Language</h3>
-                <p className="text-sm text-muted-foreground">Set your preferred language</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <Globe className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Language</h3>
+                  <p className="text-sm text-muted-foreground">Set your preferred language</p>
+                </div>
               </div>
-              <Button variant="outline">English</Button>
+              <Button variant="outline" className="gap-2">
+                <Globe className="h-4 w-4" />
+                English
+              </Button>
             </div>
             <Separator />
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Start with Windows</h3>
-                <p className="text-sm text-muted-foreground">Launch Arcadia when you log in</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                  <Activity className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Start with Windows</h3>
+                  <p className="text-sm text-muted-foreground">Launch Arcadia when you log in</p>
+                </div>
               </div>
-              <Button variant="outline">Off</Button>
+              <Switch />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Game Installation Settings */}
+        <Card className="bg-gradient-to-br from-green-500/5 to-emerald-500/5 border-green-500/20 hover-scale animate-fade-in" style={{ animationDelay: '100ms' }}>
           <CardHeader>
-            <CardTitle>Game Installation</CardTitle>
+            <div className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-green-600" />
+              <CardTitle>Game Installation</CardTitle>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Default Installation Path</h3>
-                <p className="text-sm text-muted-foreground">Set where games are installed by default</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <HardDrive className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Default Installation Path</h3>
+                  <p className="text-sm text-muted-foreground">Set where games are installed by default</p>
+                </div>
               </div>
-              <Button variant="outline">C:\Games</Button>
+              <Button variant="outline" className="gap-2">
+                <HardDrive className="h-4 w-4" />
+                C:\Games
+              </Button>
             </div>
             <Separator />
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Auto-update Games</h3>
-                <p className="text-sm text-muted-foreground">Automatically update games when available</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <RefreshCw className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Auto-update Games</h3>
+                  <p className="text-sm text-muted-foreground">Automatically update games when available</p>
+                </div>
               </div>
-              <Button variant="outline">On</Button>
+              <Switch defaultChecked />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Performance Settings */}
+        <Card className="bg-gradient-to-br from-purple-500/5 to-pink-500/5 border-purple-500/20 hover-scale animate-fade-in" style={{ animationDelay: '200ms' }}>
           <CardHeader>
-            <CardTitle>Performance</CardTitle>
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-purple-600" />
+              <CardTitle>Performance</CardTitle>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Performance Overlay</h3>
-                <p className="text-sm text-muted-foreground">Show FPS and system stats in-game</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Performance Overlay</h3>
+                  <p className="text-sm text-muted-foreground">Show FPS and system stats in-game</p>
+                </div>
               </div>
-              <Button variant="outline">Off</Button>
+              <Switch />
             </div>
             <Separator />
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Hardware Acceleration</h3>
-                <p className="text-sm text-muted-foreground">Use GPU for UI rendering</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
+                  <Cpu className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Hardware Acceleration</h3>
+                  <p className="text-sm text-muted-foreground">Use GPU for UI rendering</p>
+                </div>
               </div>
-              <Button variant="outline">On</Button>
+              <Switch defaultChecked />
             </div>
             <Separator />
-            <div className="flex justify-between items-center">              
-              <div>
-                <h3 className="font-medium">System Metrics</h3>
-                <p className="text-sm text-muted-foreground">Show live system metrics in dashboard</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
+                  <Activity className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">System Metrics</h3>
+                  <p className="text-sm text-muted-foreground">Show live system metrics in dashboard</p>
+                </div>
               </div>
               <Switch
                 checked={settings.systemMetricsEnabled}
@@ -740,41 +1314,91 @@ const Settings = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Privacy Settings */}
+        <Card className="bg-gradient-to-br from-orange-500/5 to-yellow-500/5 border-orange-500/20 hover-scale animate-fade-in" style={{ animationDelay: '300ms' }}>
           <CardHeader>
-            <CardTitle>Privacy</CardTitle>
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-orange-600" />
+              <CardTitle>Privacy</CardTitle>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Share Play Statistics</h3>
-                <p className="text-sm text-muted-foreground">Allow sharing of your play activity with friends</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Share Play Statistics</h3>
+                  <p className="text-sm text-muted-foreground">Allow sharing of your play activity with friends</p>
+                </div>
               </div>
-              <Button variant="outline">On</Button>
+              <Switch defaultChecked />
             </div>
             <Separator />
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Usage Data Collection</h3>
-                <p className="text-sm text-muted-foreground">Help improve Arcadia by sending anonymous usage data</p>
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-slate-600 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Usage Data Collection</h3>
+                  <p className="text-sm text-muted-foreground">Help improve Arcadia by sending anonymous usage data</p>
+                </div>
               </div>
-              <Button variant="outline">Off</Button>
+              <Switch />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* About Section */}
+        <Card className="bg-gradient-to-br from-indigo-500/5 to-blue-500/5 border-indigo-500/20 hover-scale animate-fade-in" style={{ animationDelay: '400ms' }}>
           <CardHeader>
-            <CardTitle>About</CardTitle>
+            <div className="flex items-center gap-2">
+              <Info className="h-5 w-5 text-indigo-600" />
+              <CardTitle>About</CardTitle>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-medium">Arcadia Game Manager</h3>
-              <p className="text-sm text-muted-foreground">Version 0.1.0 (Alpha)</p>
+            <div className="flex items-center gap-4 group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-purple-600 rounded-xl flex items-center justify-center">
+                <Gamepad className="h-8 w-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-lg">Arcadia Game Manager</h3>
+                <p className="text-sm text-muted-foreground">Version 0.1.0 (Alpha)</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="secondary" className="bg-green-500/20 text-green-700 border-green-500/30">
+                    <Activity className="h-3 w-3 mr-1" />
+                    Active Development
+                  </Badge>
+                  <Badge variant="outline">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    Early Access
+                  </Badge>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline">Check for Updates</Button>
-              <Button variant="outline">View Licenses</Button>
+            
+            <Separator />
+            
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Check for Updates
+              </Button>
+              <Button variant="outline" className="gap-2">
+                <ExternalLink className="h-4 w-4" />
+                View Licenses
+              </Button>
+              <Button variant="outline" className="gap-2">
+                <Users className="h-4 w-4" />
+                Join Community
+              </Button>
+              <Button variant="outline" className="gap-2">
+                <Info className="h-4 w-4" />
+                Documentation
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -851,120 +1475,227 @@ const GameDetail = ({ gameId, onBack }: GameDetailProps) => {
         ram: '12 GB RAM',
         storage: '70 GB SSD'
       }
-    }
+    },
+    color: gameId === 'game1' ? 'from-yellow-500 to-orange-600' :
+      gameId === 'game2' ? 'from-purple-500 to-indigo-600' :
+        gameId === 'game3' ? 'from-green-500 to-teal-600' :
+          gameId === 'game4' ? 'from-red-500 to-orange-600' :
+            gameId === 'game5' ? 'from-gray-500 to-slate-600' :
+              gameId === 'game6' ? 'from-blue-500 to-indigo-600' : 'from-gray-400 to-gray-600',
+    rating: gameId === 'game1' ? 4.2 :
+      gameId === 'game2' ? 4.8 :
+        gameId === 'game3' ? 4.6 :
+          gameId === 'game4' ? 4.4 :
+            gameId === 'game5' ? 4.6 :
+              gameId === 'game6' ? 4.4 : 4.0
   };
 
   return (
     <div className="p-6">
+      {/* Enhanced Header */}
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={onBack} size="sm">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={onBack} size="sm" className="gap-2">
+            <ChevronLeft className="h-4 w-4" />
             Back
           </Button>
-          <h1 className="text-2xl font-bold">{gameDetails.name}</h1>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              {gameDetails.name}
+            </h1>
+            <p className="text-muted-foreground">by {gameDetails.developer}</p>
+          </div>
         </div>
         <div className="flex gap-2">
           {gameDetails.installed ? (
             <>
-              <Button variant="default">Play</Button>
-              <Button variant="outline">Update</Button>
+              <Button variant="default" className="gap-2">
+                <Play className="h-4 w-4" />
+                Play
+              </Button>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Update
+              </Button>
             </>
           ) : (
-            <Button variant="default">Install</Button>
+            <Button variant="default" className="gap-2">
+              <Download className="h-4 w-4" />
+              Install
+            </Button>
           )}
-          <Button variant="outline">•••</Button>
+          <Button variant="outline" className="gap-2">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Main Content */}
         <div className="md:col-span-2 space-y-6">
-          <Card>
-            <div className="h-64 bg-accent flex items-center justify-center">
-              <div className="text-4xl font-bold text-muted-foreground">
-                {gameDetails.name.substring(0, 1)}
+          {/* Hero Card */}
+          <Card className="overflow-hidden hover-scale animate-fade-in">
+            <div className={`relative h-64 bg-gradient-to-br ${gameDetails.color} flex items-center justify-center`}>
+              <div className="absolute inset-0 bg-black/20" />
+              <div className="relative z-10 text-center">
+                <div className="text-6xl font-bold text-white drop-shadow-lg mb-2">
+                  {gameDetails.name.substring(0, 1)}
+                </div>
+                <div className="flex items-center justify-center gap-2 text-white/90">
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <span className="text-lg font-medium">{gameDetails.rating}</span>
+                </div>
+              </div>
+              
+              {/* Status Badge */}
+              <div className="absolute top-4 right-4">
+                <Badge 
+                  variant={gameDetails.installed ? "default" : "outline"}
+                  className={gameDetails.installed ? "bg-green-500/90 text-white border-green-400" : "bg-black/40 backdrop-blur-sm text-white border-white/20"}
+                >
+                  <div className="flex items-center gap-1">
+                    {gameDetails.installed ? (
+                      <CheckCircle className="h-3 w-3" />
+                    ) : (
+                      <Download className="h-3 w-3" />
+                    )}
+                    {gameDetails.installed ? 'Installed' : 'Not Installed'}
+                  </div>
+                </Badge>
               </div>
             </div>
-            <CardContent className="p-4">
-              <h2 className="text-xl font-semibold mb-2">Description</h2>
-              <p className="text-muted-foreground">{gameDetails.description}</p>
+            
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
+                <Info className="h-5 w-5 text-primary" />
+                Description
+              </h2>
+              <p className="text-muted-foreground leading-relaxed mb-4">{gameDetails.description}</p>
 
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div>
-                  <h3 className="text-sm font-medium">Developer</h3>
-                  <p className="text-sm">{gameDetails.developer}</p>
+              {/* Enhanced Game Info Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    <h3 className="text-sm font-medium">Developer</h3>
+                  </div>
+                  <p className="text-sm font-medium">{gameDetails.developer}</p>
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium">Publisher</h3>
-                  <p className="text-sm">{gameDetails.publisher}</p>
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Globe className="h-4 w-4 text-green-600" />
+                    <h3 className="text-sm font-medium">Publisher</h3>
+                  </div>
+                  <p className="text-sm font-medium">{gameDetails.publisher}</p>
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium">Release Date</h3>
-                  <p className="text-sm">{gameDetails.releaseDate}</p>
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="h-4 w-4 text-purple-600" />
+                    <h3 className="text-sm font-medium">Release Date</h3>
+                  </div>
+                  <p className="text-sm font-medium">{gameDetails.releaseDate}</p>
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium">Install Size</h3>
-                  <p className="text-sm">{gameDetails.size}</p>
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <HardDrive className="h-4 w-4 text-orange-600" />
+                    <h3 className="text-sm font-medium">Install Size</h3>
+                  </div>
+                  <p className="text-sm font-medium">{gameDetails.size}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          {/* DLC & Add-ons */}
+          <Card className="hover-scale animate-fade-in" style={{ animationDelay: '100ms' }}>
             <CardHeader>
-              <CardTitle>DLC & Add-ons</CardTitle>
+              <div className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-primary" />
+                <CardTitle>DLC & Add-ons</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
-              {gameDetails.dlc.map((dlc, index) => (
-                <div key={index} className="flex justify-between items-center py-2 border-b last:border-none">
-                  <div>
-                    <p className="font-medium">{dlc.name}</p>
-                    <p className="text-sm text-muted-foreground">Expansion Pack</p>
+              <div className="space-y-3">
+                {gameDetails.dlc.map((dlc, index) => (
+                  <div key={index} className="flex justify-between items-center p-3 rounded-lg hover:bg-muted/50 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 bg-gradient-to-br ${dlc.installed ? 'from-green-500 to-emerald-600' : 'from-gray-500 to-slate-600'} rounded-lg flex items-center justify-center`}>
+                        {dlc.installed ? (
+                          <CheckCircle className="h-5 w-5 text-white" />
+                        ) : (
+                          <Download className="h-5 w-5 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium group-hover:text-primary transition-colors">{dlc.name}</p>
+                        <p className="text-sm text-muted-foreground">Expansion Pack</p>
+                      </div>
+                    </div>
+                    <Badge variant={dlc.installed ? "default" : "outline"} className={dlc.installed ? "bg-green-500/20 text-green-700 border-green-500/30" : ""}>
+                      {dlc.installed ? "Installed" : "Not Installed"}
+                    </Badge>
                   </div>
-                  <Badge variant={dlc.installed ? "secondary" : "outline"}>
-                    {dlc.installed ? "Installed" : "Not Installed"}
-                  </Badge>
-                </div>
-              ))}
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Sidebar */}
         <div className="space-y-6">
-          <Card>
+          {/* Play Statistics */}
+          <Card className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border-blue-500/20 hover-scale animate-fade-in" style={{ animationDelay: '200ms' }}>
             <CardHeader>
-              <CardTitle>Play Statistics</CardTitle>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                <CardTitle>Play Statistics</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between">
-                    <span>Total Playtime</span>
-                    <span className="font-medium">{gameDetails.playtime}</span>
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <span className="text-sm">Total Playtime</span>
+                    </div>
+                    <span className="font-bold text-lg">{gameDetails.playtime}</span>
                   </div>
-                  <Separator className="my-2" />
-                  <div className="flex justify-between">
-                    <span>Last Played</span>
+                </div>
+                
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">Last Played</span>
+                    </div>
                     <span className="font-medium">{gameDetails.lastPlayed}</span>
                   </div>
                 </div>
 
                 <div className="mt-4">
-                  <h3 className="font-medium mb-2">Achievements</h3>
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Star className="h-4 w-4 text-yellow-500" />
+                    <h3 className="font-medium">Achievements</h3>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
                     <div>
-                      <span className="text-xl font-bold">
-                        {gameDetails.achievements.unlocked}/{gameDetails.achievements.total}
+                      <span className="text-2xl font-bold text-primary">
+                        {gameDetails.achievements.unlocked}
+                      </span>
+                      <span className="text-lg text-muted-foreground">
+                        /{gameDetails.achievements.total}
                       </span>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm font-medium">
                         {Math.round((gameDetails.achievements.unlocked / gameDetails.achievements.total) * 100)}% Complete
                       </span>
                     </div>
                   </div>
-                  <div className="w-full bg-secondary h-2 rounded-full mt-2">
+                  <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
                     <div
-                      className="bg-primary h-2 rounded-full"
+                      className="bg-gradient-to-r from-primary to-purple-600 h-3 rounded-full transition-all duration-1000 ease-out"
                       style={{ width: `${(gameDetails.achievements.unlocked / gameDetails.achievements.total) * 100}%` }}
                     ></div>
                   </div>
@@ -973,32 +1704,72 @@ const GameDetail = ({ gameId, onBack }: GameDetailProps) => {
             </CardContent>
           </Card>
 
-          <Card>
+          {/* System Requirements */}
+          <Card className="bg-gradient-to-br from-green-500/5 to-teal-500/5 border-green-500/20 hover-scale animate-fade-in" style={{ animationDelay: '300ms' }}>
             <CardHeader>
-              <CardTitle>System Requirements</CardTitle>
+              <div className="flex items-center gap-2">
+                <Cpu className="h-5 w-5 text-green-600" />
+                <CardTitle>System Requirements</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium mb-1">Minimum</h3>
-                  <ul className="text-sm space-y-1">
-                    <li><span className="text-muted-foreground">OS:</span> {gameDetails.systemRequirements.minimum.os}</li>
-                    <li><span className="text-muted-foreground">CPU:</span> {gameDetails.systemRequirements.minimum.cpu}</li>
-                    <li><span className="text-muted-foreground">GPU:</span> {gameDetails.systemRequirements.minimum.gpu}</li>
-                    <li><span className="text-muted-foreground">RAM:</span> {gameDetails.systemRequirements.minimum.ram}</li>
-                    <li><span className="text-muted-foreground">Storage:</span> {gameDetails.systemRequirements.minimum.storage}</li>
-                  </ul>
+                <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
+                  <h3 className="font-medium mb-2 flex items-center gap-2">
+                    <Monitor className="h-4 w-4 text-orange-600" />
+                    Minimum
+                  </h3>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">OS:</span>
+                      <span className="font-medium">{gameDetails.systemRequirements.minimum.os}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">CPU:</span>
+                      <span className="font-medium text-xs">{gameDetails.systemRequirements.minimum.cpu}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">GPU:</span>
+                      <span className="font-medium text-xs">{gameDetails.systemRequirements.minimum.gpu}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">RAM:</span>
+                      <span className="font-medium">{gameDetails.systemRequirements.minimum.ram}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Storage:</span>
+                      <span className="font-medium text-xs">{gameDetails.systemRequirements.minimum.storage}</span>
+                    </div>
+                  </div>
                 </div>
-                <Separator />
-                <div>
-                  <h3 className="font-medium mb-1">Recommended</h3>
-                  <ul className="text-sm space-y-1">
-                    <li><span className="text-muted-foreground">OS:</span> {gameDetails.systemRequirements.recommended.os}</li>
-                    <li><span className="text-muted-foreground">CPU:</span> {gameDetails.systemRequirements.recommended.cpu}</li>
-                    <li><span className="text-muted-foreground">GPU:</span> {gameDetails.systemRequirements.recommended.gpu}</li>
-                    <li><span className="text-muted-foreground">RAM:</span> {gameDetails.systemRequirements.recommended.ram}</li>
-                    <li><span className="text-muted-foreground">Storage:</span> {gameDetails.systemRequirements.recommended.storage}</li>
-                  </ul>
+                
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                  <h3 className="font-medium mb-2 flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-green-600" />
+                    Recommended
+                  </h3>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">OS:</span>
+                      <span className="font-medium">{gameDetails.systemRequirements.recommended.os}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">CPU:</span>
+                      <span className="font-medium text-xs">{gameDetails.systemRequirements.recommended.cpu}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">GPU:</span>
+                      <span className="font-medium text-xs">{gameDetails.systemRequirements.recommended.gpu}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">RAM:</span>
+                      <span className="font-medium">{gameDetails.systemRequirements.recommended.ram}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Storage:</span>
+                      <span className="font-medium text-xs">{gameDetails.systemRequirements.recommended.storage}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -1050,12 +1821,11 @@ export default function App(): JSX.Element {
   const handleGameSelect = (gameId: string): void => {
     setSelectedGameId(gameId);
     setCurrentView('game-detail');
-  };
-  return (
+  };  return (
     <SettingsProvider>
       <SettingsContext.Consumer>
-        {({ settings }) => (
-          <ThemeProvider defaultTheme={settings.theme} storageKey="ui-theme">
+        {(context) => (
+          <ThemeProvider defaultTheme={context?.settings.theme || 'dark'} storageKey="ui-theme">
             <div className="h-screen flex flex-col bg-background text-foreground">
               <TopBar />
               <div className="flex flex-1 overflow-hidden">
