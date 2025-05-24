@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { 
-  ImageIcon, 
   BarChart3, 
   Settings as SettingsIcon, 
   Cpu, 
@@ -23,7 +22,6 @@ import {
   Star,
   Clock,
   MoreHorizontal,
-  Camera,
   TrendingUp,
   Users,
   Zap,
@@ -91,7 +89,7 @@ const ThemeProvider = ({ children, defaultTheme = 'dark', storageKey = 'theme' }
 const SideNav = ({ currentView, onChange, libraryStatus }: SideNavProps) => (
   <div className="w-64 h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
     <div className="p-4 space-y-1">
-      {['dashboard', 'library', 'screenshots', 'analytics', 'settings'].map((item) => (
+      {['dashboard', 'library', 'analytics', 'settings'].map((item) => (
         <Button
           key={item}
           variant={currentView === item ? "secondary" : "ghost"}
@@ -641,209 +639,6 @@ const Library = ({ onGameSelect }: GameActionProps) => {
                 </Button>
                 <Button variant="outline" size="sm" className="gap-1">
                   <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const Screenshots = () => {
-  // Enhanced screenshot data with categories and metadata
-  const screenshots = [
-    { 
-      id: 'ss1', 
-      game: 'Cyberpunk 2077', 
-      date: 'May 15, 2025', 
-      size: '4.2 MB',
-      category: 'Action',
-      resolution: '1920x1080',
-      color: 'from-yellow-500 to-orange-600'
-    },
-    { 
-      id: 'ss2', 
-      game: 'Elden Ring', 
-      date: 'May 10, 2025', 
-      size: '3.8 MB',
-      category: 'Scenic',
-      resolution: '2560x1440',
-      color: 'from-amber-500 to-yellow-600'
-    },
-    { 
-      id: 'ss3', 
-      game: 'Baldur\'s Gate 3', 
-      date: 'May 8, 2025', 
-      size: '5.1 MB',
-      category: 'Character',
-      resolution: '1920x1080',
-      color: 'from-purple-500 to-pink-600'
-    },
-    { 
-      id: 'ss4', 
-      game: 'Cyberpunk 2077', 
-      date: 'May 7, 2025', 
-      size: '4.5 MB',
-      category: 'Action',
-      resolution: '1920x1080',
-      color: 'from-yellow-500 to-orange-600'
-    },
-    { 
-      id: 'ss5', 
-      game: 'Red Dead Redemption 2', 
-      date: 'May 5, 2025', 
-      size: '6.2 MB',
-      category: 'Scenic',
-      resolution: '3840x2160',
-      color: 'from-red-500 to-orange-600'
-    },
-    { 
-      id: 'ss6', 
-      game: 'Elden Ring', 
-      date: 'May 3, 2025', 
-      size: '3.5 MB',
-      category: 'Combat',
-      resolution: '2560x1440',
-      color: 'from-amber-500 to-yellow-600'
-    },
-  ];
-
-  const stats = {
-    total: screenshots.length,
-    totalSize: screenshots.reduce((acc, ss) => acc + parseFloat(ss.size), 0).toFixed(1),
-    categories: {
-      'Action': screenshots.filter(s => s.category === 'Action').length,
-      'Scenic': screenshots.filter(s => s.category === 'Scenic').length,
-      'Character': screenshots.filter(s => s.category === 'Character').length,
-      'Combat': screenshots.filter(s => s.category === 'Combat').length,
-    }
-  };
-
-  return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-            Screenshots
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {stats.total} screenshots • {stats.totalSize} MB total
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter by Game
-          </Button>
-          <Button variant="default" size="sm" className="gap-2">
-            <Camera className="h-4 w-4" />
-            Import
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-            <div className="text-sm text-muted-foreground">Total Screenshots</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{stats.totalSize} MB</div>
-            <div className="text-sm text-muted-foreground">Storage Used</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/20">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-orange-600">{stats.categories.Action + stats.categories.Combat}</div>
-            <div className="text-sm text-muted-foreground">Action Shots</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{stats.categories.Scenic}</div>
-            <div className="text-sm text-muted-foreground">Scenic Views</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {screenshots.map((screenshot, index) => (
-          <Card 
-            key={screenshot.id} 
-            className="overflow-hidden hover-scale transition-all duration-300 hover:shadow-xl group animate-fade-in"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <div className={`relative h-48 bg-gradient-to-br ${screenshot.color} flex items-center justify-center overflow-hidden`}>
-              <div className="absolute inset-0 bg-black/20" />
-              <div className="relative z-10">
-                <div className="text-white font-bold text-lg mb-2 text-center drop-shadow-lg">
-                  Screenshot Preview
-                </div>
-                <div className="flex items-center justify-center gap-2 text-white/80 text-sm">
-                  <ImageIcon className="h-4 w-4" />
-                  {screenshot.resolution}
-                </div>
-              </div>
-              
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Category badge */}
-              <div className="absolute top-3 left-3 z-10">
-                <Badge 
-                  variant="secondary" 
-                  className="bg-black/40 backdrop-blur-sm text-white border-white/20"
-                >
-                  {screenshot.category}
-                </Badge>
-              </div>
-            </div>
-            
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium truncate flex-1">{screenshot.game}</h3>
-                <Badge variant="outline" className="text-xs">
-                  {screenshot.size}
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {screenshot.date}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Monitor className="h-3 w-3" />
-                  {screenshot.resolution}
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 gap-1">
-                  <ExternalLink className="h-3 w-3" />
-                  View
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1 gap-1">
-                  <Users className="h-3 w-3" />
-                  Share
-                </Button>
-                <Button variant="outline" size="sm" className="gap-1">
-                  <MoreHorizontal className="h-3 w-3" />
                 </Button>
               </div>
             </CardContent>
@@ -1837,7 +1632,6 @@ export default function App(): JSX.Element {
                 <main className="flex-1 overflow-auto">
                   {currentView === 'dashboard' && <Dashboard onGameSelect={handleGameSelect} />}
                   {currentView === 'library' && <Library onGameSelect={handleGameSelect} />}
-                  {currentView === 'screenshots' && <Screenshots />}
                   {currentView === 'analytics' && <Analytics />}
                   {currentView === 'settings' && <Settings />}
                   {currentView === 'game-detail' && selectedGameId && (
