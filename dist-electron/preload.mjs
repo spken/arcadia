@@ -21,3 +21,7 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
     return electron.ipcRenderer.invoke("get-system-info");
   }
 });
+electron.contextBridge.exposeInMainWorld("electron", {
+  readFile: (path) => electron.ipcRenderer.invoke("read-file", path),
+  writeFile: (path, data) => electron.ipcRenderer.invoke("write-file", path, data)
+});

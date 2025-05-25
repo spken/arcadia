@@ -1,10 +1,9 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import fs from 'node:fs/promises'
 import si from 'systeminformation'
 
-const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // The built directory structure
@@ -162,9 +161,31 @@ app.whenReady().then(async () => {
   if (win) {
     win.webContents.send('system-info-update', initialSystemInfo);
   }
-  
-  ipcMain.handle('get-system-info', async () => {
+    ipcMain.handle('get-system-info', async () => {
     return await getSystemInfo();
+  });
+
+  ipcMain.handle('read-file', async (_, filePath: string) => {
+    try {
+      const fullPath = path.join(process.env.APP_ROOT || __dirname, filePath);
+      const data = await fs.readFile(fullPath, 'utf-8');
+      return data;
+    } catch (error) {
+      if ((error as any).code === 'ENOENT') {
+        return null;
+      }
+      throw error;
+    }
+  });
+
+  ipcMain.handle('write-file', async (_, filePath: string, data: string) => {
+    try {
+      const fullPath = path.join(process.env.APP_ROOT || __dirname, filePath);
+      await fs.writeFile(fullPath, data, 'utf-8');
+    } catch (error) {
+      console.error('Error writing file:', error);
+      throw error;
+    }
   });
     let systemInfoInterval: NodeJS.Timeout;
   

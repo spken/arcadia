@@ -23,3 +23,8 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     return ipcRenderer.invoke('get-system-info')
   },
 })
+
+contextBridge.exposeInMainWorld('electron', {
+  readFile: (path: string) => ipcRenderer.invoke('read-file', path),
+  writeFile: (path: string, data: string) => ipcRenderer.invoke('write-file', path, data),
+})

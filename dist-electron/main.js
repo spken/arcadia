@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path$3 from "node:path";
+import fs$b from "node:fs/promises";
 import require$$0$1 from "os";
 import require$$1$1 from "fs";
 import require$$2 from "path";
@@ -17384,7 +17384,6 @@ bluetooth.bluetoothDevices = bluetoothDevices;
   exports.powerShellRelease = util2.powerShellRelease;
 })(lib);
 const si = /* @__PURE__ */ getDefaultExportFromCjs(lib);
-createRequire(import.meta.url);
 const __dirname = path$3.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path$3.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -17497,6 +17496,27 @@ app.whenReady().then(async () => {
   }
   ipcMain.handle("get-system-info", async () => {
     return await getSystemInfo();
+  });
+  ipcMain.handle("read-file", async (_, filePath) => {
+    try {
+      const fullPath = path$3.join(process.env.APP_ROOT || __dirname, filePath);
+      const data = await fs$b.readFile(fullPath, "utf-8");
+      return data;
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        return null;
+      }
+      throw error;
+    }
+  });
+  ipcMain.handle("write-file", async (_, filePath, data) => {
+    try {
+      const fullPath = path$3.join(process.env.APP_ROOT || __dirname, filePath);
+      await fs$b.writeFile(fullPath, data, "utf-8");
+    } catch (error) {
+      console.error("Error writing file:", error);
+      throw error;
+    }
   });
   let systemInfoInterval;
   systemInfoInterval = setInterval(async () => {
