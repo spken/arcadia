@@ -24,7 +24,7 @@ const navItems = [
 export const SideNav = ({ currentView, onChange }: SideNavProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64'} h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 ease-in-out`}>
+    <div className={`${isCollapsed ? 'w-16' : 'w-48'} h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 ease-in-out`}>
       <div className="p-4">
         {/* Toggle Button */}
         <Button
