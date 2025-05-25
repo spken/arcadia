@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import {
   Settings as SettingsIcon,
@@ -114,7 +113,6 @@ export const Settings = () => {
                 {settings.theme === 'dark' ? 'Dark' : 'Light'}
               </Button>
             </div>
-            <Separator />
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
@@ -129,8 +127,7 @@ export const Settings = () => {
                 <Globe className="h-4 w-4" />
                 English
               </Button>
-            </div>
-            <Separator />            
+            </div>        
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
@@ -179,7 +176,6 @@ export const Settings = () => {
                 C:\Games
               </Button>
             </div>
-            <Separator />
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
@@ -232,7 +228,6 @@ export const Settings = () => {
                 }}
               />
             </div>
-            <Separator />
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
@@ -253,7 +248,6 @@ export const Settings = () => {
                 }}
               />
             </div>
-            <Separator />
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">              
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
@@ -308,7 +302,6 @@ export const Settings = () => {
                 }}
               />
             </div>
-            <Separator />
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-slate-600 rounded-lg flex items-center justify-center">
@@ -361,10 +354,8 @@ export const Settings = () => {
                 </div>
               </div>
             </div>
-            
-            <Separator />
-            
-            <div className="flex flex-wrap gap-2">
+
+            <div className="flex flex-wrap gap-2 mt-4">
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
                 Check for Updates
