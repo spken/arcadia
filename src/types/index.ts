@@ -21,6 +21,7 @@ export interface LibraryStatus {
 }
 
 export interface AppSettings {
+  nickname: string;
   theme: 'light' | 'dark' | 'auto';
   systemMetricsEnabled: boolean;
   language: string;

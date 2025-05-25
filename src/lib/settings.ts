@@ -3,6 +3,7 @@ import { AppSettings } from '@/types';
 const isElectron = typeof window !== 'undefined' && window.electron;
 
 const defaultSettings: AppSettings = {
+  nickname: 'Player',
   theme: 'dark',
   systemMetricsEnabled: true,
   language: 'english',

@@ -15,8 +15,10 @@ import {
   Clock
 } from 'lucide-react';
 import { GameActionProps } from '@/types';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export const Dashboard = ({ onGameSelect }: GameActionProps) => {
+  const { settings } = useSettings();
   const recentGames = [
     { id: 'game1', name: 'Cyberpunk 2077', lastPlayed: '2 hours ago' },
     { id: 'game2', name: 'Elden Ring', lastPlayed: 'yesterday' },
@@ -51,8 +53,12 @@ export const Dashboard = ({ onGameSelect }: GameActionProps) => {
     });
     setLoading({cpu: false, memory: false, gpu: false, storage: false});
   }, []);
-
   useEffect(() => {
+    // Only fetch system info if system metrics are enabled
+    if (!settings.systemMetricsEnabled) {
+      return;
+    }
+    
     let isMounted = true;
     
     setLoading({cpu: true, memory: true, gpu: true, storage: true});
@@ -75,7 +81,7 @@ export const Dashboard = ({ onGameSelect }: GameActionProps) => {
       isMounted = false;
       window.ipcRenderer.off('system-info-update', handleSystemInfoUpdate);
     };
-  }, [handleSystemInfoUpdate]);
+  }, [handleSystemInfoUpdate, settings.systemMetricsEnabled]);
 
   return (
     <div className="p-6 space-y-6">
@@ -83,7 +89,7 @@ export const Dashboard = ({ onGameSelect }: GameActionProps) => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-            Welcome back, Player
+            Welcome back, {settings.nickname}
           </h1>
         </div>
         <Button variant="outline" className="gap-2">
@@ -168,137 +174,138 @@ export const Dashboard = ({ onGameSelect }: GameActionProps) => {
           </CardContent>
         </Card>
       </div>
-
-      {/* System Metrics */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            <CardTitle>System Metrics</CardTitle>
-            {loading.cpu || loading.memory || loading.gpu || loading.storage ? (
-              <Badge variant="outline" className="ml-auto">
-                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                Loading...
-              </Badge>
-            ) : (
-              <Badge variant="success" className="ml-auto">
-                Live
-              </Badge>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* CPU Usage */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Cpu className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium">CPU</span>
-              </div>
-              <div className="text-lg font-bold text-blue-600">
-                {loading.cpu ? (
-                  <div className="w-12 h-5 bg-muted rounded animate-pulse"></div>
-                ) : (
-                  systemStats.cpu
-                )}
-              </div>
-              <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                {loading.cpu ? (
-                  <div className="h-full w-full bg-blue-500/30 animate-pulse"></div>
-                ) : (
-                  <div
-                    className="bg-blue-500 h-2 rounded-full transition-all duration-1000 ease-out"
-                    style={{ width: `${systemStats.cpu !== 'Error' ? parseInt(systemStats.cpu) : 0}%` }}
-                  ></div>
-                )}
-              </div>
+      {/* System Metrics - Only show if enabled in settings */}
+      {settings.systemMetricsEnabled && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              <CardTitle>System Metrics</CardTitle>
+              {loading.cpu || loading.memory || loading.gpu || loading.storage ? (
+                <Badge variant="outline" className="ml-auto">
+                  <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                  Loading...
+                </Badge>
+              ) : (
+                <Badge variant="success" className="ml-auto">
+                  Live
+                </Badge>
+              )}
             </div>
-
-            {/* Memory Usage */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <HardDrive className="h-4 w-4 text-purple-600" />
-                <span className="text-sm font-medium">Memory</span>
-              </div>
-              <div className="text-lg font-bold text-purple-600">
-                {loading.memory ? (
-                  <div className="w-16 h-5 bg-muted rounded animate-pulse"></div>
-                ) : (
-                  systemStats.memory.split(' / ')[0]
-                )}
-              </div>
-              <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                {loading.memory ? (
-                  <div className="h-full w-full bg-purple-500/30 animate-pulse"></div>
-                ) : (
-                  <div
-                    className="bg-purple-500 h-2 rounded-full transition-all duration-1000 ease-out"
-                    style={{
-                      width: systemStats.memory !== 'Error'
-                        ? `${(parseFloat(systemStats.memory.split(' ')[0]) / parseFloat(systemStats.memory.split(' ')[3])) * 100}%`
-                        : '0%'
-                    }}
-                  ></div>
-                )}
-              </div>
-            </div>
-
-            {/* GPU Usage */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-yellow-600" />
-                <span className="text-sm font-medium">GPU</span>
-              </div>
-              <div className="text-lg font-bold text-yellow-600">
-                {loading.gpu ? (
-                  <div className="w-12 h-5 bg-muted rounded animate-pulse"></div>
-                ) : (
-                  systemStats.gpu
-                )}
-              </div>
-              <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                {loading.gpu ? (
-                  <div className="h-full w-full bg-yellow-500/30 animate-pulse"></div>
-                ) : (
-                  <div
-                    className="bg-yellow-500 h-2 rounded-full transition-all duration-1000 ease-out"
-                    style={{ width: `${systemStats.gpu !== 'Error' && systemStats.gpu !== 'N/A' ? parseInt(systemStats.gpu) : 0}%` }}
-                  ></div>
-                )}
-              </div>
-            </div>
-
-            {/* Storage */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <HardDrive className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium">Storage</span>
-              </div>
-              <div className="text-lg font-bold text-green-600">
-                {loading.storage ? (
-                  <div className="w-16 h-5 bg-muted rounded animate-pulse"></div>
-                ) : (
-                  systemStats.storage.split(' ')[0] + ' GB free'
-                )}
-              </div>
-              <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                {loading.storage ? (
-                  <div className="h-full w-full bg-green-500/30 animate-pulse"></div>
-                ) : (
-                  systemStats.storage !== 'Error' && (
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* CPU Usage */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium">CPU</span>
+                </div>
+                <div className="text-lg font-bold text-blue-600">
+                  {loading.cpu ? (
+                    <div className="w-12 h-5 bg-muted rounded animate-pulse"></div>
+                  ) : (
+                    systemStats.cpu
+                  )}
+                </div>
+                <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                  {loading.cpu ? (
+                    <div className="h-full w-full bg-blue-500/30 animate-pulse"></div>
+                  ) : (
                     <div
-                      className="bg-green-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                      className="bg-blue-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${systemStats.cpu !== 'Error' ? parseInt(systemStats.cpu) : 0}%` }}
+                    ></div>
+                  )}
+                </div>
+              </div>
+
+              {/* Memory Usage */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <HardDrive className="h-4 w-4 text-purple-600" />
+                  <span className="text-sm font-medium">Memory</span>
+                </div>
+                <div className="text-lg font-bold text-purple-600">
+                  {loading.memory ? (
+                    <div className="w-16 h-5 bg-muted rounded animate-pulse"></div>
+                  ) : (
+                    systemStats.memory.split(' / ')[0]
+                  )}
+                </div>
+                <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                  {loading.memory ? (
+                    <div className="h-full w-full bg-purple-500/30 animate-pulse"></div>
+                  ) : (
+                    <div
+                      className="bg-purple-500 h-2 rounded-full transition-all duration-1000 ease-out"
                       style={{
-                        width: `${100 - (parseFloat(systemStats.storage.split(' ')[0]) / parseFloat(systemStats.storage.split(' ')[4])) * 100}%`
+                        width: systemStats.memory !== 'Error'
+                          ? `${(parseFloat(systemStats.memory.split(' ')[0]) / parseFloat(systemStats.memory.split(' ')[3])) * 100}%`
+                          : '0%'
                       }}
                     ></div>
-                  )
-                )}
+                  )}
+                </div>
+              </div>
+
+              {/* GPU Usage */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-yellow-600" />
+                  <span className="text-sm font-medium">GPU</span>
+                </div>
+                <div className="text-lg font-bold text-yellow-600">
+                  {loading.gpu ? (
+                    <div className="w-12 h-5 bg-muted rounded animate-pulse"></div>
+                  ) : (
+                    systemStats.gpu
+                  )}
+                </div>
+                <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                  {loading.gpu ? (
+                    <div className="h-full w-full bg-yellow-500/30 animate-pulse"></div>
+                  ) : (
+                    <div
+                      className="bg-yellow-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${systemStats.gpu !== 'Error' && systemStats.gpu !== 'N/A' ? parseInt(systemStats.gpu) : 0}%` }}
+                    ></div>
+                  )}
+                </div>
+              </div>
+
+              {/* Storage */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <HardDrive className="h-4 w-4 text-green-600" />
+                  <span className="text-sm font-medium">Storage</span>
+                </div>
+                <div className="text-lg font-bold text-green-600">
+                  {loading.storage ? (
+                    <div className="w-16 h-5 bg-muted rounded animate-pulse"></div>
+                  ) : (
+                    systemStats.storage.split(' ')[0] + ' GB free'
+                  )}
+                </div>
+                <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                  {loading.storage ? (
+                    <div className="h-full w-full bg-green-500/30 animate-pulse"></div>
+                  ) : (
+                    systemStats.storage !== 'Error' && (
+                      <div
+                        className="bg-green-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                        style={{
+                          width: `${100 - (parseFloat(systemStats.storage.split(' ')[0]) / parseFloat(systemStats.storage.split(' ')[4])) * 100}%`
+                        }}
+                      ></div>
+                    )
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

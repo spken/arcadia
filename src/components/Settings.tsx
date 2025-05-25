@@ -2,6 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { useState, useEffect } from 'react';
 import {
   Settings as SettingsIcon,
   RefreshCw,
@@ -16,6 +18,7 @@ import {
   Cpu,
   Shield,
   Users,
+  User,
   Info,
   Gamepad,
   Sparkles,
@@ -25,6 +28,34 @@ import { useSettings } from '@/contexts/SettingsContext';
 
 export const Settings = () => {
   const { settings, updateSettings, isLoading } = useSettings();
+  const [nicknameInput, setNicknameInput] = useState(settings.nickname);
+
+  // Update local nickname input when settings change
+  useEffect(() => {
+    setNicknameInput(settings.nickname);
+  }, [settings.nickname]);
+
+  const handleNicknameChange = (value: string) => {
+    setNicknameInput(value);
+  };
+
+  const handleNicknameBlur = async () => {
+    const trimmedNickname = nicknameInput.trim();
+    const finalNickname = trimmedNickname || 'Player';
+    
+    if (finalNickname !== settings.nickname) {
+      try {
+        await updateSettings({ nickname: finalNickname });
+      } catch (error) {
+        console.error('Failed to update nickname setting:', error);
+        // Reset to current settings value on error
+        setNicknameInput(settings.nickname);
+      }
+    }
+    
+    // Update local state to show final value
+    setNicknameInput(finalNickname);
+  };
 
   if (isLoading) {
     return (
@@ -52,11 +83,11 @@ export const Settings = () => {
           <Button 
             variant="outline" 
             size="sm" 
-            className="gap-2"
-            onClick={async () => {
+            className="gap-2"            onClick={async () => {
               try {
-                await updateSettings({
-                  theme: 'dark',
+                const defaultSettings = {
+                  nickname: 'Player',
+                  theme: 'dark' as const,
                   systemMetricsEnabled: true,
                   language: 'english',
                   startWithWindows: false,
@@ -66,7 +97,9 @@ export const Settings = () => {
                   sharePlayStatistics: true,
                   usageDataCollection: false,
                   defaultInstallPath: 'C:\\Games'
-                });
+                };
+                await updateSettings(defaultSettings);
+                setNicknameInput('Player'); // Update local state too
               } catch (error) {
                 console.error('Failed to reset settings:', error);
               }
@@ -85,9 +118,33 @@ export const Settings = () => {
             <div className="flex items-center gap-2">
               <SettingsIcon className="h-5 w-5 text-blue-600" />
               <CardTitle>General</CardTitle>
-            </div>
-          </CardHeader>
+            </div>          </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Nickname</h3>
+                  <p className="text-sm text-muted-foreground">How you'll be addressed in the app</p>
+                </div>
+              </div>              <Input
+                value={nicknameInput}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleNicknameChange(e.target.value);
+                }}
+                onBlur={handleNicknameBlur}
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                  if (e.key === 'Enter') {
+                    e.currentTarget.blur();
+                  }
+                }}
+                placeholder="Enter your nickname"
+                className="w-48"
+                maxLength={20}
+              />
+            </div>
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
