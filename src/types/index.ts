@@ -6,6 +6,11 @@ export interface SideNavProps {
   libraryStatus: LibraryStatus;
 }
 
+export interface DashboardProps {
+  onGameSelect: (gameId: string) => void;
+  onChangeView: (view: string) => void;
+}
+
 export interface GameActionProps {
   onGameSelect: (gameId: string) => void;
 }

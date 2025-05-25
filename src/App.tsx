@@ -42,7 +42,7 @@ export default function App(): JSX.Element {
               onChange={setCurrentView}
             />
             <main className="flex-1 overflow-auto">
-              {currentView === 'dashboard' && <Dashboard onGameSelect={handleGameSelect} />}
+              {currentView === 'dashboard' && <Dashboard onGameSelect={handleGameSelect} onChangeView={setCurrentView} />}
               {currentView === 'library' && <Library onGameSelect={handleGameSelect} />}
               {currentView === 'analytics' && <Analytics />}
               {currentView === 'settings' && <Settings />}

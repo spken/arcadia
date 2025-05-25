@@ -14,10 +14,10 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
-import { GameActionProps } from '@/types';
+import { DashboardProps, GameActionProps } from '@/types';
 import { useSettings } from '@/contexts/SettingsContext';
 
-export const Dashboard = ({ onGameSelect }: GameActionProps) => {
+export const Dashboard = ({ onGameSelect, onChangeView }: DashboardProps) => {
   const { settings } = useSettings();
   const recentGames = [
     { id: 'game1', name: 'Cyberpunk 2077', lastPlayed: '2 hours ago' },
@@ -310,7 +310,7 @@ export const Dashboard = ({ onGameSelect }: GameActionProps) => {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Button 
-          onClick={() => onGameSelect('game1')} 
+          onClick={() => onChangeView('library')} 
           variant="outline" 
           className="h-16 text-left justify-start gap-3"
         >
@@ -322,7 +322,7 @@ export const Dashboard = ({ onGameSelect }: GameActionProps) => {
         </Button>
 
         <Button 
-          onClick={() => onGameSelect('game1')} 
+          onClick={() => onChangeView('analytics')} 
           variant="outline" 
           className="h-16 text-left justify-start gap-3"
         >
