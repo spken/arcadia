@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { ToastContextProvider } from '@/components/ui/toast';
 import { SideNav } from '@/components/SideNav';
 import { TopBar } from '@/components/TopBar';
 import { LoadingScreen } from '@/components/LoadingScreen';
@@ -34,27 +35,29 @@ export default function App(): JSX.Element {
   };  return (
     <SettingsProvider>
       <ThemeProvider>
-        <div className="h-screen flex flex-col bg-background text-foreground">
-          <TopBar />
-          <div className="flex flex-1 overflow-hidden">
-            <SideNav
-              currentView={currentView}
-              onChange={setCurrentView}
-            />
-            <main className="flex-1 overflow-auto">
-              {currentView === 'dashboard' && <Dashboard onGameSelect={handleGameSelect} onChangeView={setCurrentView} />}
-              {currentView === 'library' && <Library onGameSelect={handleGameSelect} />}
-              {currentView === 'analytics' && <Analytics />}
-              {currentView === 'settings' && <Settings />}
-              {currentView === 'game-detail' && selectedGameId && (
-                <GameDetail
-                  gameId={selectedGameId}
-                  onBack={() => setCurrentView('library')}
-                />
-              )}
-            </main>
+        <ToastContextProvider>
+          <div className="h-screen flex flex-col bg-background text-foreground">
+            <TopBar />
+            <div className="flex flex-1 overflow-hidden">
+              <SideNav
+                currentView={currentView}
+                onChange={setCurrentView}
+              />
+              <main className="flex-1 overflow-auto">
+                {currentView === 'dashboard' && <Dashboard onGameSelect={handleGameSelect} onChangeView={setCurrentView} />}
+                {currentView === 'library' && <Library onGameSelect={handleGameSelect} />}
+                {currentView === 'analytics' && <Analytics />}
+                {currentView === 'settings' && <Settings />}
+                {currentView === 'game-detail' && selectedGameId && (
+                  <GameDetail
+                    gameId={selectedGameId}
+                    onBack={() => setCurrentView('library')}
+                  />
+                )}
+              </main>
+            </div>
           </div>
-        </div>
+        </ToastContextProvider>
       </ThemeProvider>
     </SettingsProvider>
   );

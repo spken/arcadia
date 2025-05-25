@@ -14,7 +14,7 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
-import { DashboardProps, GameActionProps } from '@/types';
+import { DashboardProps } from '@/types';
 import { useSettings } from '@/contexts/SettingsContext';
 
 export const Dashboard = ({ onGameSelect, onChangeView }: DashboardProps) => {
@@ -120,7 +120,7 @@ export const Dashboard = ({ onGameSelect, onChangeView }: DashboardProps) => {
                     Last played: {game.lastPlayed}
                   </p>
                 </div>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="default">
                   <Play className="h-4 w-4 mr-1" />
                   Play
                 </Button>

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/toast';
 import { useState, useEffect } from 'react';
 import {
   Settings as SettingsIcon,
@@ -28,9 +29,9 @@ import { useSettings } from '@/contexts/SettingsContext';
 
 export const Settings = () => {
   const { settings, updateSettings, isLoading } = useSettings();
+  const { addToast } = useToast();
   const [nicknameInput, setNicknameInput] = useState(settings.nickname);
 
-  // Update local nickname input when settings change
   useEffect(() => {
     setNicknameInput(settings.nickname);
   }, [settings.nickname]);
@@ -42,18 +43,16 @@ export const Settings = () => {
   const handleNicknameBlur = async () => {
     const trimmedNickname = nicknameInput.trim();
     const finalNickname = trimmedNickname || 'Player';
-    
+
     if (finalNickname !== settings.nickname) {
       try {
         await updateSettings({ nickname: finalNickname });
       } catch (error) {
         console.error('Failed to update nickname setting:', error);
-        // Reset to current settings value on error
         setNicknameInput(settings.nickname);
       }
     }
-    
-    // Update local state to show final value
+
     setNicknameInput(finalNickname);
   };
 
@@ -79,15 +78,17 @@ export const Settings = () => {
           <p className="text-muted-foreground mt-1">
             Configure your Arcadia experience
           </p>
-        </div>        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-2"            onClick={async () => {
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={async () => {
               try {
                 const defaultSettings = {
                   nickname: 'Player',
-                  theme: 'dark' as const,
+                  theme: 'light' as const,
                   systemMetricsEnabled: true,
                   language: 'english',
                   startWithWindows: false,
@@ -99,7 +100,7 @@ export const Settings = () => {
                   defaultInstallPath: 'C:\\Games'
                 };
                 await updateSettings(defaultSettings);
-                setNicknameInput('Player'); // Update local state too
+                setNicknameInput('Player');
               } catch (error) {
                 console.error('Failed to reset settings:', error);
               }
@@ -109,16 +110,15 @@ export const Settings = () => {
             Reset to Defaults
           </Button>
         </div>
-      </div>
-
-      <div className="space-y-6 max-w-4xl">
+      </div>      <div className="space-y-6 max-w-4xl">
         {/* General Settings */}
         <Card className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border-blue-500/20 hover-scale animate-fade-in">
           <CardHeader>
             <div className="flex items-center gap-2">
               <SettingsIcon className="h-5 w-5 text-blue-600" />
               <CardTitle>General</CardTitle>
-            </div>          </CardHeader>
+            </div>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
               <div className="flex items-center gap-3">
@@ -129,7 +129,8 @@ export const Settings = () => {
                   <h3 className="font-medium">Nickname</h3>
                   <p className="text-sm text-muted-foreground">How you'll be addressed in the app</p>
                 </div>
-              </div>              <Input
+              </div>
+              <Input
                 value={nicknameInput}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   handleNicknameChange(e.target.value);
@@ -154,11 +155,12 @@ export const Settings = () => {
                   <h3 className="font-medium">Theme</h3>
                   <p className="text-sm text-muted-foreground">Change the appearance of the application</p>
                 </div>
-              </div>              <Button 
-                variant="outline" 
+              </div>
+              <Button
+                variant="outline"
                 className="gap-2"
                 onClick={async () => {
-                  const nextTheme = settings.theme === 'dark' ? 'light' : 'dark';
+                  const nextTheme = settings.theme === 'light' ? 'dark' : 'light';
                   try {
                     await updateSettings({ theme: nextTheme });
                   } catch (error) {
@@ -167,7 +169,7 @@ export const Settings = () => {
                 }}
               >
                 <Monitor className="h-4 w-4" />
-                {settings.theme === 'dark' ? 'Dark' : 'Light'}
+                {settings.theme === 'light' ? 'Light' : 'Dark'}
               </Button>
             </div>
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
@@ -184,7 +186,7 @@ export const Settings = () => {
                 <Globe className="h-4 w-4" />
                 English
               </Button>
-            </div>        
+            </div>
             <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
@@ -237,7 +239,8 @@ export const Settings = () => {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <RefreshCw className="h-5 w-5 text-white" />
-                </div>                <div>
+                </div>
+                <div>
                   <h3 className="font-medium">Auto-update Games</h3>
                   <p className="text-sm text-muted-foreground">Automatically update games when available</p>
                 </div>
@@ -269,7 +272,8 @@ export const Settings = () => {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
                   <BarChart3 className="h-5 w-5 text-white" />
-                </div>                <div>
+                </div>
+                <div>
                   <h3 className="font-medium">Performance Overlay</h3>
                   <p className="text-sm text-muted-foreground">Show FPS and system stats in-game</p>
                 </div>
@@ -289,23 +293,53 @@ export const Settings = () => {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
                   <Cpu className="h-5 w-5 text-white" />
-                </div>                <div>
+                </div>
+                <div>
                   <h3 className="font-medium">Hardware Acceleration</h3>
                   <p className="text-sm text-muted-foreground">Use GPU for UI rendering</p>
                 </div>
-              </div>
-              <Switch
+              </div>              <Switch
                 checked={settings.hardwareAcceleration}
                 onCheckedChange={async (checked) => {
                   try {
                     await updateSettings({ hardwareAcceleration: checked });
+                    addToast({
+                      title: "Restart Required",
+                      description: "Hardware acceleration changes require an app restart to take effect.",
+                      variant: "warning",
+                      duration: 0,
+                      action: (
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={async () => {
+                              try {
+                                console.log('Restart button clicked');
+                                if (window.electron?.restartApp) {
+                                  console.log('Calling restartApp...');
+                                  await window.electron.restartApp();
+                                  console.log('restartApp called successfully');
+                                } else {
+                                  console.error('window.electron.restartApp not available');
+                                }
+                              } catch (error) {
+                                console.error('Failed to restart app:', error);
+                              }
+                            }}
+                          >
+                            Restart Now
+                          </Button>
+                        </div>
+                      )
+                    });
                   } catch (error) {
                     console.error('Failed to update hardware acceleration setting:', error);
                   }
                 }}
               />
             </div>
-            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">              
+            <div className="flex justify-between items-center group hover:bg-muted/50 rounded-lg p-3 -m-3 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center">
                   <Activity className="h-5 w-5 text-white" />
@@ -363,7 +397,7 @@ export const Settings = () => {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-slate-600 rounded-lg flex items-center justify-center">
                   <BarChart3 className="h-5 w-5 text-white" />
-                </div>                
+                </div>
                 <div>
                   <h3 className="font-medium">Usage Data Collection</h3>
                   <p className="text-sm text-muted-foreground">Help improve Arcadia by sending anonymous usage data</p>
@@ -433,6 +467,5 @@ export const Settings = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>  );
 };

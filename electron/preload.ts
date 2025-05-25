@@ -27,4 +27,6 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 contextBridge.exposeInMainWorld('electron', {
   readFile: (path: string) => ipcRenderer.invoke('read-file', path),
   writeFile: (path: string, data: string) => ipcRenderer.invoke('write-file', path, data),
+  restartApp: () => ipcRenderer.invoke('restart-app'),
+  hardwareAccelerationChanged: () => ipcRenderer.invoke('hardware-acceleration-changed'),
 })

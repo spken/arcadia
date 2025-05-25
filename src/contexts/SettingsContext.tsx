@@ -14,7 +14,7 @@ export function useSettings() {
 
 export function SettingsProvider({ children }: { children: ReactNode }) {  const [settings, setSettings] = useState<AppSettings>({
     nickname: 'Player',
-    theme: 'dark',
+    theme: 'light',
     systemMetricsEnabled: true,
     language: 'english',
     startWithWindows: false,

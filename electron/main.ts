@@ -17,6 +17,23 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // │
 process.env.APP_ROOT = path.join(__dirname, '..')
 
+async function loadEarlySettings() {
+  try {
+    const settingsPath = path.join(process.env.APP_ROOT, 'settings.json');
+    const settingsData = await fs.readFile(settingsPath, 'utf8');
+    const settings = JSON.parse(settingsData);
+    
+    if (settings.hardwareAcceleration === false) {
+      app.disableHardwareAcceleration();
+      console.log('Hardware acceleration disabled by user settings');
+    }
+  } catch (error) {
+    console.log('No settings file found or error loading settings, using defaults');
+  }
+}
+
+loadEarlySettings();
+
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
@@ -161,7 +178,10 @@ app.whenReady().then(async () => {
   if (win) {
     win.webContents.send('system-info-update', initialSystemInfo);
   }
-    ipcMain.handle('get-system-info', async () => {
+
+  let systemInfoInterval: NodeJS.Timeout;
+
+  ipcMain.handle('get-system-info', async () => {
     return await getSystemInfo();
   });
 
@@ -177,7 +197,6 @@ app.whenReady().then(async () => {
       throw error;
     }
   });
-
   ipcMain.handle('write-file', async (_, filePath: string, data: string) => {
     try {
       const fullPath = path.join(process.env.APP_ROOT || __dirname, filePath);
@@ -187,8 +206,43 @@ app.whenReady().then(async () => {
       throw error;
     }
   });
-    let systemInfoInterval: NodeJS.Timeout;
-  
+  ipcMain.handle('restart-app', async () => {
+    try {
+      console.log('Restart requested...');
+      
+      if (systemInfoInterval) {
+        clearInterval(systemInfoInterval);
+      }
+      
+      if (VITE_DEV_SERVER_URL) {
+        console.log('Development mode: reloading window...');
+        if (win) {
+          win.reload();
+        }
+        return true;
+      }
+      
+      console.log('Production mode: restarting app...');
+      
+      BrowserWindow.getAllWindows().forEach(window => {
+        window.close();
+      });
+      
+      setTimeout(() => {
+        app.relaunch();
+        app.exit(0);
+      }, 100);
+      
+      return true;
+    } catch (error) {
+      console.error('Error during restart:', error);
+      throw error;
+    }
+  });
+  ipcMain.handle('hardware-acceleration-changed', async () => {
+    return true;
+  });
+
   systemInfoInterval = setInterval(async () => {
     if (win) {
       const systemInfo = await getSystemInfo();

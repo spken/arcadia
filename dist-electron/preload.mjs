@@ -23,5 +23,7 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
 });
 electron.contextBridge.exposeInMainWorld("electron", {
   readFile: (path) => electron.ipcRenderer.invoke("read-file", path),
-  writeFile: (path, data) => electron.ipcRenderer.invoke("write-file", path, data)
+  writeFile: (path, data) => electron.ipcRenderer.invoke("write-file", path, data),
+  restartApp: () => electron.ipcRenderer.invoke("restart-app"),
+  hardwareAccelerationChanged: () => electron.ipcRenderer.invoke("hardware-acceleration-changed")
 });
