@@ -111,11 +111,11 @@ export const Dashboard = ({ onGameSelect, onChangeView }: DashboardProps) => {
             {recentGames.map((game) => (
               <div 
                 key={game.id} 
-                className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                className="group flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
                 onClick={() => onGameSelect(game.id)}
               >
                 <div>
-                  <h3 className="font-medium">{game.name}</h3>
+                  <h3 className="font-medium group-hover:text-primary">{game.name}</h3>
                   <p className="text-sm text-muted-foreground">
                     Last played: {game.lastPlayed}
                   </p>

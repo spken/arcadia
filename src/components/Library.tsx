@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Plus, 
-  CheckCircle, 
-  Download, 
-  Play, 
-  Grid3X3, 
+import {
+  Plus,
+  CheckCircle,
+  Download,
+  Play,
+  Grid3X3,
   List,
   Search,
   Star,
@@ -28,11 +28,11 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   // Enhanced game data with additional properties
   const games = [
-    { 
-      id: 'game1', 
-      name: 'Cyberpunk 2077', 
-      developer: 'CD Projekt Red', 
-      installed: true, 
+    {
+      id: 'game1',
+      name: 'Cyberpunk 2077',
+      developer: 'CD Projekt Red',
+      installed: true,
       size: '65.2 GB',
       playtime: '45h',
       lastPlayed: '2 hours ago',
@@ -43,11 +43,11 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
       image: 'from-yellow-500 to-orange-600',
       hidden: false
     },
-    { 
-      id: 'game2', 
-      name: 'Elden Ring', 
-      developer: 'FromSoftware', 
-      installed: true, 
+    {
+      id: 'game2',
+      name: 'Elden Ring',
+      developer: 'FromSoftware',
+      installed: true,
       size: '44.7 GB',
       playtime: '120h',
       lastPlayed: 'yesterday',
@@ -58,11 +58,11 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
       image: 'from-amber-500 to-yellow-600',
       hidden: false
     },
-    { 
-      id: 'game3', 
-      name: 'Baldur\'s Gate 3', 
-      developer: 'Larian Studios', 
-      installed: true, 
+    {
+      id: 'game3',
+      name: 'Baldur\'s Gate 3',
+      developer: 'Larian Studios',
+      installed: true,
       size: '122.0 GB',
       playtime: '80h',
       lastPlayed: '3 days ago',
@@ -73,11 +73,11 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
       image: 'from-purple-500 to-pink-600',
       hidden: false
     },
-    { 
-      id: 'game4', 
-      name: 'Red Dead Redemption 2', 
-      developer: 'Rockstar Games', 
-      installed: false, 
+    {
+      id: 'game4',
+      name: 'Red Dead Redemption 2',
+      developer: 'Rockstar Games',
+      installed: false,
       size: '112.5 GB',
       playtime: '0h',
       lastPlayed: 'never',
@@ -88,11 +88,11 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
       image: 'from-red-500 to-orange-600',
       hidden: false
     },
-    { 
-      id: 'game5', 
-      name: 'The Witcher 3: Wild Hunt', 
-      developer: 'CD Projekt Red', 
-      installed: false, 
+    {
+      id: 'game5',
+      name: 'The Witcher 3: Wild Hunt',
+      developer: 'CD Projekt Red',
+      installed: false,
       size: '50.0 GB',
       playtime: '0h',
       lastPlayed: 'never',
@@ -103,11 +103,11 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
       image: 'from-gray-500 to-slate-600',
       hidden: false
     },
-    { 
-      id: 'game6', 
-      name: 'Mass Effect Legendary Edition', 
-      developer: 'BioWare', 
-      installed: false, 
+    {
+      id: 'game6',
+      name: 'Mass Effect Legendary Edition',
+      developer: 'BioWare',
+      installed: false,
       size: '120.0 GB',
       playtime: '0h',
       lastPlayed: 'never',
@@ -123,15 +123,15 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
   const filteredGames = games
     .filter(game => {
       // Search filter
-      if (searchQuery && !game.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
-          !game.developer.toLowerCase().includes(searchQuery.toLowerCase())) {
+      if (searchQuery && !game.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !game.developer.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
-      
+
       // Installation filter
       if (filterBy === 'installed' && !game.installed) return false;
       if (filterBy === 'notInstalled' && game.installed) return false;
-      
+
       return true;
     })
     .sort((a, b) => {
@@ -157,7 +157,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
   const installedCount = games.filter(g => g.installed).length;
 
   const GridCard = ({ game }: { game: any }) => (
-    <Card 
+    <Card
       className="group overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-[1.02] bg-card/80 backdrop-blur-sm border-border/50"
       onClick={() => onGameSelect(game.id)}
     >
@@ -168,7 +168,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
           <div className="text-4xl font-bold text-white drop-shadow-lg relative z-10">
             {game.name.substring(0, 1)}
           </div>
-          
+
           {/* Status badges */}
           <div className="absolute top-3 left-3">
             {game.installed && (
@@ -176,43 +176,45 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Installed
               </Badge>
-            )}          </div>          {/* Hover overlay with actions */}
+            )}
+          </div>
+          {/* Hover overlay with actions */}
           <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center z-20">            <div className="flex gap-2 relative z-30">
-              <Button 
-                size="sm" 
-                className="shadow-lg backdrop-blur-sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Handle play/install action here
-                }}
-              >
-                {game.installed ? (
-                  <>
-                    <Play className="h-4 w-4 mr-1" />
-                    Play
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 mr-1" />
-                    Install
-                  </>
-                )}
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline"
-                className="shadow-lg backdrop-blur-sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Handle more options here
-                }}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              size="sm"
+              className="shadow-lg backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Handle play/install action here
+              }}
+            >
+              {game.installed ? (
+                <>
+                  <Play className="h-4 w-4 mr-1" />
+                  Play
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-1" />
+                  Install
+                </>
+              )}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="shadow-lg backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Handle more options here
+              }}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </div>
           </div>
         </div>
-        
+
         {/* Game Info */}
         <CardContent className="p-4">
           <div className="space-y-3">
@@ -222,7 +224,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
               </h3>
               <p className="text-sm text-muted-foreground">{game.developer}</p>
             </div>
-            
+
             {/* Tags */}
             <div className="flex flex-wrap gap-1">
               {game.tags.slice(0, 2).map((tag: string) => (
@@ -236,7 +238,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
                 </Badge>
               )}
             </div>
-              {/* Stats */}
+            {/* Stats */}
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1 text-muted-foreground">
@@ -251,7 +253,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
                 )}
               </div>
             </div>
-            
+
             <div className="flex justify-between items-center text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <HardDrive className="h-3 w-3" />
@@ -267,7 +269,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
     </Card>
   );
   const ListItem = ({ game }: { game: any }) => (
-    <div 
+    <div
       className="group flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer border border-transparent hover:border-border/50"
       onClick={() => onGameSelect(game.id)}
     >
@@ -282,38 +284,39 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
           </div>
         )}
       </div>
-      
+
       {/* Game info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between">          <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between">
+          <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-sm group-hover:text-primary transition-colors truncate">
               {game.name}
             </h3>
             <p className="text-xs text-muted-foreground">{game.developer}</p>
           </div>
-          
+
           {/* Stats */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground ml-4">
             <div className="flex items-center gap-1">
               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
               <span>{game.rating}</span>
             </div>
-            
+
             {game.installed && (
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 <span>{game.playtime}</span>
               </div>
             )}
-            
+
             <div className="flex items-center gap-1">
               <HardDrive className="h-3 w-3" />
               <span>{game.size}</span>
             </div>
-            
+
             {/* Actions */}
             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button size="sm" variant="outline" className="h-6 px-2 text-xs">
+              <Button size="sm" variant="default" className="h-6 px-2 text-xs">
                 {game.installed ? (
                   <>
                     <Play className="h-3 w-3 mr-1" />
@@ -332,7 +335,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
             </div>
           </div>
         </div>
-        
+
         {game.installed && (
           <div className="mt-1 text-xs text-muted-foreground">
             Last played: {game.lastPlayed}
@@ -354,7 +357,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
             {installedCount} of {games.length} games installed • {filteredGames.length} games shown
           </p>
         </div>
-        
+
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="gap-2">
             <Plus className="h-4 w-4" />
@@ -376,7 +379,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
+
         <div className="flex items-center gap-4">
           {/* Filters */}
           <div className="flex items-center gap-2">
@@ -404,7 +407,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
               Not Installed
             </Button>
           </div>
-            {/* Sort */}
+          {/* Sort */}
           <select
             className="px-3 py-1 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             value={sortBy}
@@ -416,7 +419,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
             <option value="rating">Rating</option>
             <option value="playtime">Playtime</option>
           </select>
-          
+
           {/* View Toggle */}
           <div className="flex border border-border rounded-md">
             <Button
@@ -451,7 +454,7 @@ export const Library = ({ onGameSelect }: GameActionProps) => {
           {filteredGames.map((game) => (
             <GridCard key={game.id} game={game} />
           ))}
-        </div>      ) : (
+        </div>) : (
         <div className="space-y-1">
           {filteredGames.map((game) => (
             <ListItem key={game.id} game={game} />

@@ -139,7 +139,7 @@ export const GameDetail = ({ gameId, onBack }: GameDetailProps) => {
                 {gameDetails.name.substring(0, 1)}
               </div>
               <div className="absolute top-4 right-4">
-                <Badge variant={gameDetails.installed ? "default" : "outline"}>
+                <Badge variant={gameDetails.installed ? "default" : "secondary"}>
                   {gameDetails.installed ? 'Installed' : 'Not Installed'}
                 </Badge>
               </div>
